@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# OS / Editor
+.DS_Store
+*.log
+
+# Local tooling & temporary QA screenshots
+.skills/
+qa-*.png
