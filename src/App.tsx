@@ -665,6 +665,7 @@ export function App() {
         <InfoModal
           onClose={() => setInfoOpen(false)}
           onOpenStudio={() => setStudioOpen(true)}
+          petCount={allPets.length}
         />
       )}
 

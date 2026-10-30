@@ -509,6 +509,13 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               type="button"
+              onClick={onOpenInfo}
+              className="surface surface-outline text-ink rounded-full px-3 h-8 text-body font-medium"
+            >
+              Info
+            </button>
+            <button
+              type="button"
               onClick={() => onChangeDarkMode(!darkMode)}
               aria-label="Toggle theme"
               className="surface surface-outline size-8 rounded-full grid place-items-center text-ink-2"

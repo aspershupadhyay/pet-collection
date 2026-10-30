@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Check, Sparkles, Terminal, Code2, Layers, Cpu } from 'lucide-react';
 import { PetcraftMark } from './PetcraftMark';
 import { PetDefinition } from '../types/pet';
-import { PETS } from '../data/pets';
+import { PETS, PET_ACTIONS } from '../data/pets';
+import { EXPORT_TOOLS } from '../utils/toolExport';
 
 interface InfoModalProps {
   onClose: () => void;
   onOpenStudio: () => void;
+  /** Total companions in the directory, including community submissions. */
+  petCount: number;
 }
 
-const INFO_STATS: { value: string; label: string }[] = [
-  { value: '20', label: 'companions' },
-  { value: '11', label: 'live states' },
-  { value: '7', label: 'habitats' },
-  { value: '5', label: 'export targets' },
-];
+// Derived from the data so the numbers can't drift from what's actually shipped.
+const HABITAT_COUNT = new Set(PETS.map((p) => p.habitat).filter((h) => h !== 'none')).size;
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
 const INFO_FEATURES: { icon: React.ReactNode; title: string; body: string; tag: string }[] = [
   {
@@ -43,13 +44,44 @@ const INFO_FEATURES: { icon: React.ReactNode; title: string; body: string; tag: 
   },
 ];
 
-export const InfoModal: React.FC<InfoModalProps> = ({ onClose, onOpenStudio }) => {
+export const InfoModal: React.FC<InfoModalProps> = ({ onClose, onOpenStudio, petCount }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  const stats: { value: number; label: string }[] = [
+    { value: petCount, label: 'companions' },
+    { value: PET_ACTIONS.length, label: 'live states' },
+    { value: HABITAT_COUNT, label: 'habitats' },
+    { value: EXPORT_TOOLS.length, label: 'export targets' },
+  ];
+
   useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+    document.documentElement.style.overflow = 'hidden';
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      // Keep Tab focus inside the dialog
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusables = dialogRef.current.querySelectorAll<HTMLElement>('button, [href], [tabindex]:not([tabindex="-1"])');
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.documentElement.style.overflow = '';
+      previouslyFocused?.focus();
+    };
   }, [onClose]);
 
   return (
@@ -63,8 +95,10 @@ export const InfoModal: React.FC<InfoModalProps> = ({ onClose, onOpenStudio }) =
         role="dialog"
         aria-modal="true"
         aria-labelledby="info-title"
+        ref={dialogRef}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="animate-popup-in relative z-10 w-full max-w-[30rem] overflow-hidden rounded-sheet bg-page shadow-[var(--shadow-stage)] ring-1 ring-line-strong"
+        className="animate-popup-in relative z-10 w-full max-w-[30rem] overflow-hidden rounded-sheet bg-page shadow-[var(--shadow-stage)] ring-1 ring-line-strong outline-none"
       >
         {/* Close — pinned top-right */}
         <button
@@ -103,13 +137,12 @@ export const InfoModal: React.FC<InfoModalProps> = ({ onClose, onOpenStudio }) =
           </div>
 
           <dl className="relative mt-6 grid grid-cols-4 divide-x divide-dashed divide-line-strong rounded-xl bg-well ring-1 ring-line">
-            {INFO_STATS.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center gap-0.5 px-2 py-2.5">
-                <dt className="sr-only">{stat.label}</dt>
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex flex-col-reverse items-center gap-0.5 px-2 py-2.5">
+                <dt className="text-[10px] text-ink-3">{stat.label}</dt>
                 <dd className="font-display text-[20px] font-semibold leading-none tabular-nums text-ink">
                   {stat.value}
                 </dd>
-                <span className="text-[10px] text-ink-3">{stat.label}</span>
               </div>
             ))}
           </dl>
@@ -137,9 +170,9 @@ export const InfoModal: React.FC<InfoModalProps> = ({ onClose, onOpenStudio }) =
         </ul>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 border-t border-dashed border-line-strong px-6 py-4">
-          <span className="text-small text-ink-3">
-            <kbd className="mr-1 rounded-md bg-well px-1.5 py-0.5 font-mono text-[11px] text-ink ring-1 ring-line">⌘K</kbd>
+        <div className="flex items-center justify-between gap-3 border-t border-dashed border-line-strong px-6 py-4 max-sm:justify-end">
+          <span className="text-small text-ink-3 max-sm:hidden">
+            <kbd className="mr-1 rounded-md bg-well px-1.5 py-0.5 font-mono text-[11px] text-ink ring-1 ring-line">{IS_MAC ? '⌘K' : 'Ctrl K'}</kbd>
             to search
           </span>
           <div className="flex items-center gap-2">
@@ -149,14 +182,14 @@ export const InfoModal: React.FC<InfoModalProps> = ({ onClose, onOpenStudio }) =
                 onClose();
                 onOpenStudio();
               }}
-              className="surface surface-outline tap h-8 rounded-full px-3.5 text-body font-medium text-ink"
+              className="surface surface-outline tap h-8 whitespace-nowrap rounded-full px-3.5 text-body font-medium text-ink"
             >
               Open sandbox
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="surface surface-primary tap h-8 rounded-full px-4 text-body font-medium text-white"
+              className="surface surface-primary tap h-8 whitespace-nowrap rounded-full px-4 text-body font-medium text-white"
             >
               Start exploring
             </button>
