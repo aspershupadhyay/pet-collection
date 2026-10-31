@@ -807,3 +807,30 @@
   .pc-seg-fill { animation: none; transform: scaleX(1); }
   .pc-card:hover .pc-stage { transform: none; }
 }
+
+/* Pet detail: the card's artwork grows into the stage (View Transitions),
+   while the scrim and rail ease in around it. */
+::view-transition-group(pet-stage) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+::view-transition-old(pet-stage),
+::view-transition-new(pet-stage) {
+  height: 100%;
+  object-fit: cover;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+.pet-detail .pd-scrim { animation: pd-fade 0.35s ease-out both; }
+.pet-detail .pd-rail { animation: pd-rail 0.45s cubic-bezier(0.32, 0.72, 0, 1) both; }
+@keyframes pd-fade { from { opacity: 0; } }
+@keyframes pd-rail { from { opacity: 0; transform: translateX(-16px); } }
+@media (max-width: 1023px) {
+  @keyframes pd-rail { from { opacity: 0; transform: translateY(24px); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-detail .pd-scrim, .pet-detail .pd-rail { animation: none; }
+}

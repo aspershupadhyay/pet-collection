@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/pets/:id", "destination": "/index.html" }]
+}

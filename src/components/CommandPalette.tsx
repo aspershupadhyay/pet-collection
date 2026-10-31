@@ -136,7 +136,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleInputKeyDown}
-          placeholder="Search 20 companions by name, species, artist (Elthen, Marc Duiker), or tool..."
+          placeholder="Search companions by name, species, artist (Elthen, Marc Duiker), or tool..."
           className="flex-1 bg-transparent text-[14px] text-ink placeholder:text-ink-3 outline-none"
           autoFocus
         />

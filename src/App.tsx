@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { PETS } from './data/pets';
 import { PetAction, PetCategory, PetDefinition, PetFolder } from './types/pet';
 import { Sidebar, NavSection } from './components/Sidebar';
@@ -6,7 +7,7 @@ import { Header, SortMode } from './components/Header';
 import { PetCard } from './components/PetCard';
 import { ListView } from './components/ListView';
 import { CanvasView } from './components/CanvasView';
-import { PetModal } from './components/PetModal';
+import { PetDetail } from './components/PetDetail';
 import { StudioView } from './components/StudioView';
 import { CommandPalette } from './components/CommandPalette';
 import { SubmitModal } from './components/InfoSubmitModals';
@@ -15,7 +16,6 @@ import { Masonry } from './components/Masonry';
 import { petHash } from './data/showreel';
 import { petScale, petRefHeight } from './components/PixelSprite';
 import { Toast, ToastItem } from './components/Toast';
-import { generateToolSnippets } from './utils/toolExport';
 import { Folder as FolderIcon, Plus, Trash2 } from 'lucide-react';
 
 /* Tile shapes for the masonry wall (stage width ÷ height). Each pet keeps the
@@ -127,6 +127,71 @@ export function App() {
     variant?: string;
   } | null>(null);
   const [studioOpen, setStudioOpen] = useState(false);
+
+  /* ── Opening a pet: shared-element morph from its card + a real URL ── */
+  const canMorph = () =>
+    typeof document !== 'undefined' &&
+    'startViewTransition' in document &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const openPet = useCallback(
+    (pet: PetDefinition, opts: { action?: PetAction; variant?: string; stage?: HTMLElement | null } = {}) => {
+      const path = `/pets/${pet.id}`;
+      if (window.location.pathname !== path) {
+        const inDetail = window.location.pathname.startsWith('/pets/');
+        if (inDetail) window.history.replaceState({}, '', path);
+        else window.history.pushState({}, '', path);
+      }
+      const commit = () => setActivePetModal({ pet, action: opts.action ?? 'idle', variant: opts.variant });
+      const stage = opts.stage;
+      if (stage && canMorph()) {
+        stage.style.viewTransitionName = 'pet-stage';
+        document.startViewTransition(() => {
+          stage.style.viewTransitionName = '';
+          flushSync(commit);
+        });
+      } else {
+        commit();
+      }
+    },
+    []
+  );
+
+  const closePet = useCallback(
+    (fromHistory = false) => {
+      if (!fromHistory && window.location.pathname.startsWith('/pets/')) {
+        window.history.pushState({}, '', '/');
+      }
+      const id = activePetModal?.pet.id;
+      const card = id ? (document.querySelector(`[data-pet-stage="${id}"]`) as HTMLElement | null) : null;
+      const r = card?.getBoundingClientRect();
+      const onScreen = !!r && r.bottom > 0 && r.top < window.innerHeight;
+      if (card && onScreen && canMorph()) {
+        const t = document.startViewTransition(() => {
+          flushSync(() => setActivePetModal(null));
+          card.style.viewTransitionName = 'pet-stage';
+        });
+        t.finished.finally(() => (card.style.viewTransitionName = ''));
+      } else {
+        setActivePetModal(null);
+      }
+    },
+    [activePetModal]
+  );
+
+  // Deep links and the back button
+  useEffect(() => {
+    const sync = (fromHistory: boolean) => {
+      const m = window.location.pathname.match(/^\/pets\/([\w-]+)/);
+      const pet = m ? allPets.find((p) => p.id === m[1]) : null;
+      if (pet) setActivePetModal((cur) => (cur?.pet.id === pet.id ? cur : { pet, action: 'idle' }));
+      else if (fromHistory) closePet(true);
+    };
+    sync(false);
+    const onPop = () => sync(true);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [allPets, closePet]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -265,15 +330,6 @@ export function App() {
     [folders, allPets, addToast]
   );
 
-  const handleQuickCopy = useCallback(
-    (pet: PetDefinition) => {
-      const snippets = generateToolSnippets(pet, 'idle');
-      navigator.clipboard.writeText(snippets[0].code);
-      addToast(`Copied ${pet.name} snippet!`, `Ready to paste into ${snippets[0].name}`);
-    },
-    [addToast]
-  );
-
   const handleSelectNav = useCallback((nav: NavSection) => {
     setActiveNav(nav);
     setSponsorFocus(false);
@@ -371,7 +427,7 @@ export function App() {
           onSelectNav={handleSelectNav}
           favouritesCount={favourites.length}
           onOpenSponsor={openSponsor}
-          onSelectPet={(pet) => setActivePetModal({ pet, action: 'idle' })}
+          onSelectPet={(pet) => openPet(pet)}
           folders={folders}
           activeFolderId={activeFolderId}
           onSelectFolder={handleSelectFolder}
@@ -398,7 +454,7 @@ export function App() {
                 onOpenStudio={() => setStudioOpen(true)}
                 onOpenInfo={() => handleSelectNav('info')}
                 onOpenSubmit={() => setSubmitOpen(true)}
-                onSelectPet={(pet) => setActivePetModal({ pet, action: 'idle' })}
+                onSelectPet={(pet) => openPet(pet)}
                 darkMode={darkMode}
                 onChangeDarkMode={setDarkMode}
                 muted={muted}
@@ -572,7 +628,7 @@ export function App() {
                       width={width}
                       ratio={ratio}
                       renderMode={renderMode}
-                      onSelectPet={(p, act, variant) => setActivePetModal({ pet: p, action: act, variant })}
+                      onSelectPet={(p, act, variant, stage) => openPet(p, { action: act, variant, stage })}
                       isFavourite={favourites.includes(pet.id)}
                       onToggleFavourite={toggleFavourite}
                       folders={folders}
@@ -581,26 +637,9 @@ export function App() {
                   )}
                 />
               ) : viewMode === 'list' ? (
-                <ListView
-                  pets={sortedPets}
-                  globalAction="auto"
-                  renderMode={renderMode}
-                  onSelectPet={(p) => setActivePetModal({ pet: p, action: 'idle' })}
-                  onQuickCopy={handleQuickCopy}
-                  bookmarks={favourites}
-                  onToggleBookmark={toggleFavourite}
-                />
+                <ListView pets={sortedPets} bookmarks={favourites} onSelectPet={(p) => openPet(p)} />
               ) : (
-                <CanvasView
-                  pets={sortedPets}
-                  globalAction="auto"
-                  renderMode={renderMode}
-                  onSelectPet={(p, act) => setActivePetModal({ pet: p, action: act })}
-                  onQuickCopy={handleQuickCopy}
-                  favourites={favourites}
-                  onToggleFavourite={toggleFavourite}
-                  muted={muted}
-                />
+                <CanvasView pets={sortedPets} onSelectPet={(p) => openPet(p)} />
               )}
             </div>
           </main>
@@ -678,20 +717,22 @@ export function App() {
         </div>
       )}
 
-        {/* Companion Inspector Drawer / Sheet (PetModal) */}
-        <PetModal
-          pet={activePetModal ? activePetModal.pet : null}
+      {/* Pet detail — morphs out of the card that opened it */}
+      {activePetModal && (
+        <PetDetail
+          pet={activePetModal.pet}
+          initialVariant={activePetModal.variant}
+          siblings={sortedPets.some((p) => p.id === activePetModal.pet.id) ? sortedPets : allPets}
           allPets={allPets}
-          onClose={() => setActivePetModal(null)}
-          onSelectSimilar={(next) => setActivePetModal({ pet: next, action: 'idle' })}
-          onOpenSandbox={() => {
-            setActivePetModal(null);
-            setStudioOpen(true);
-          }}
-          isBookmarked={activePetModal ? favourites.includes(activePetModal.pet.id) : false}
-          onToggleBookmark={toggleFavourite}
-          onCopySuccess={(msg) => addToast(msg, 'Copied to clipboard')}
+          isFavourite={favourites.includes(activePetModal.pet.id)}
+          onToggleFavourite={toggleFavourite}
+          folders={folders}
+          onTogglePetInFolder={handleTogglePetInFolder}
+          onSelect={(p) => openPet(p)}
+          onClose={() => closePet()}
+          onCopied={(msg, sub) => addToast(msg, sub ?? 'Copied to clipboard')}
         />
+      )}
 
       {/* Multi-Pet Interactive Sandbox */}
       {studioOpen && (
@@ -710,7 +751,7 @@ export function App() {
           pets={allPets}
           onSelectPet={(pet) => {
             setSearchOpen(false);
-            setActivePetModal({ pet, action: 'idle' });
+            openPet(pet);
           }}
           onCopySuccess={(msg) => addToast(msg, 'Copied to clipboard')}
         />

@@ -68,7 +68,7 @@ export const StudioView: React.FC<StudioViewProps> = ({
             Companion Action Sandbox
           </h1>
           <p className="text-small text-ink-3">
-            Test all 20 companions across 11 states, pixel habitats, coat colors, and Claude Code `/buddy` ASCII mode.
+            Test every companion across 11 states, pixel habitats, coat colors, and Claude Code `/buddy` ASCII mode.
           </p>
         </div>
 
