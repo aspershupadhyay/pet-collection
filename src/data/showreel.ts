@@ -1,5 +1,5 @@
 import { PetAction, PetDefinition } from '../types/pet';
-import { resolveSpritePath } from '../components/PetRenderer';
+import { resolveSpritePath } from '../utils/sprites';
 
 /* A pet's showreel: the short, self-playing loop each tile runs so a visitor
    learns what the companion does without touching a control. Moments are

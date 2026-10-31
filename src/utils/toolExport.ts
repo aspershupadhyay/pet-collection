@@ -1,3 +1,4 @@
+import { asset } from '../utils/asset';
 import { PetAction, PetDefinition } from '../types/pet';
 
 export type ExportToolId =
@@ -151,12 +152,12 @@ export function ${pet.name.replace(/[^a-zA-Z0-9]/g, '')}Companion({
           availableVariants: pet.availableVariants,
           habitat: pet.habitat,
           sprites: {
-            idle: `/sprites/${folder}/${activeVariant}_idle_8fps.gif`,
-            walk: `/sprites/${folder}/${activeVariant}_walk_8fps.gif`,
-            run: `/sprites/${folder}/${activeVariant}_run_8fps.gif`,
+            idle: asset(`/sprites/${folder}/${activeVariant}_idle_8fps.gif`),
+            walk: asset(`/sprites/${folder}/${activeVariant}_walk_8fps.gif`),
+            run: asset(`/sprites/${folder}/${activeVariant}_run_8fps.gif`),
             sleep: pet.sprites.sleep.replace(pet.sprites.variant, activeVariant),
-            swipe: `/sprites/${folder}/${activeVariant}_swipe_8fps.gif`,
-            withBall: `/sprites/${folder}/${activeVariant}_with_ball_8fps.gif`,
+            swipe: asset(`/sprites/${folder}/${activeVariant}_swipe_8fps.gif`),
+            withBall: asset(`/sprites/${folder}/${activeVariant}_with_ball_8fps.gif`),
           },
           stats: pet.stats,
         },

@@ -1,3 +1,4 @@
+import { asset } from '../utils/asset';
 import { ActionMeta, PetCategory, PetDefinition } from '../types/pet';
 
 export const PET_ACTIONS: ActionMeta[] = [
@@ -25,7 +26,7 @@ export const PET_CATEGORIES: PetCategory[] = [
   'Avian',
 ];
 
-export const PETS: PetDefinition[] = [
+const RAW_PETS: PetDefinition[] = [
   {
     id: 'akita_inu',
     name: 'Hachiko',
@@ -1167,3 +1168,12 @@ export const PETS: PetDefinition[] = [
   },
 ];
 
+
+/* Sprite paths are written root-relative above; resolve them against the
+   deploy base once, here, so every consumer gets a loadable URL. */
+export const PETS: PetDefinition[] = RAW_PETS.map((pet) => ({
+  ...pet,
+  sprites: Object.fromEntries(
+    Object.entries(pet.sprites).map(([k, v]) => [k, k === 'folder' || k === 'variant' ? v : asset(v as string)])
+  ) as unknown as PetDefinition['sprites'],
+}));

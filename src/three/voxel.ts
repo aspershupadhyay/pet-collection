@@ -1,12 +1,10 @@
 import { parseGIF, decompressFrames } from 'gifuct-js';
-import spriteMeta from '../data/spriteMeta.json';
+import { spriteMetaFor } from '../data/meta';
 
 /* Turns an 8fps pixel GIF into stacks of voxels, one per art pixel. Depth
    grows with distance from the silhouette edge, so a flat sprite becomes a
    rounded little figure you can turn all the way around. */
 
-type Meta = [number, number, number, number, number, number, number, number];
-const META = spriteMeta as unknown as Record<string, Meta>;
 
 export interface VoxelFrame {
   count: number;
@@ -141,7 +139,7 @@ export function loadVoxelClip(url: string): Promise<VoxelClip> {
   if (hit) return hit;
   const job = (async () => {
     const { W, H, out } = await decodeFrames(url);
-    const meta = META[url];
+    const meta = spriteMetaFor(url);
     const unit = meta?.[2] ?? 1;
     const box: [number, number, number, number] = meta ? [meta[3], meta[4], meta[5], meta[6]] : [0, 0, W, H];
     const bw = box[2] - box[0];

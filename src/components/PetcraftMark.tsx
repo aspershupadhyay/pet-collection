@@ -1,3 +1,4 @@
+import { COLLECTION, BRAND } from '../collection';
 import React from 'react';
 
 /* PetcraftMark — original brand mark: a little terminal window that grew cat
@@ -105,15 +106,30 @@ export const PetcraftMark: React.FC<{ size?: number; className?: string; animate
   );
 };
 
+/* The collection's mark: the Petcraft monitor for Petcraft, a pixel
+   monogram for any other collection built on the shell. */
+export const BrandMark: React.FC<{ size?: number }> = ({ size = 30 }) =>
+  COLLECTION.id === 'petcraft' ? (
+    <PetcraftMark size={size} />
+  ) : (
+    <span
+      aria-hidden="true"
+      className="grid shrink-0 place-items-center rounded-[28%] bg-ink font-pixel text-page"
+      style={{ width: size, height: size, fontSize: size * 0.55 }}
+    >
+      {BRAND.wordmark.slice(0, 1).toUpperCase()}
+    </span>
+  );
+
 /* Wordmark lockup used in the sidebar, mobile hero and info sheet. */
 export const PetcraftLogo: React.FC<{ size?: number; textClassName?: string }> = ({
   size = 30,
   textClassName = 'text-[17px]',
 }) => (
   <span className="inline-flex items-center gap-2.5">
-    <PetcraftMark size={size} />
+    <BrandMark size={size} />
     <span className={`inline-flex items-baseline font-pixel leading-none tracking-[-0.01em] text-ink whitespace-nowrap ${textClassName}`}>
-      petcraft
+      {BRAND.wordmark}
       <span className="pc-mark-blink ml-[1px] text-[#5b7cff]">_</span>
     </span>
   </span>

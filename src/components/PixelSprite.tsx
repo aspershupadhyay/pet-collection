@@ -1,13 +1,12 @@
 import React, { useMemo, useRef } from 'react';
 import { PetAction, PetDefinition } from '../types/pet';
-import { resolveSpritePath } from './PetRenderer';
+import { resolveSpritePath } from '../utils/sprites';
 import { getShowreel } from '../data/showreel';
 import { useInView } from '../hooks/useInView';
-import spriteMeta from '../data/spriteMeta.json';
+import { spriteMetaFor } from '../data/meta';
 
 /* [width, height, unit, x0, y0, x1, y1] — see scripts/sprite-meta.mjs */
 type Meta = [number, number, number, number, number, number, number];
-const META = spriteMeta as unknown as Record<string, Meta>;
 
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
@@ -24,20 +23,36 @@ interface PixelSpriteProps {
   fill?: number;
   shadow?: boolean;
   className?: string;
+  /** Fixed on-screen scale (from petBox), so a line-up shares one size. */
+  scale?: { scale: number; unit: number };
 }
 
 /** Typical pose height of a pet, in GIF pixels. */
 export function petRefHeight(pet: PetDefinition): number {
   const heights = getShowreel(pet)
-    .map((m) => META[resolveSpritePath(pet, m.action)])
-    .filter(Boolean)
+    .map((m) => spriteMetaFor(resolveSpritePath(pet, m.action)))
+    .filter((m): m is NonNullable<typeof m> => !!m)
     .map((m) => m[6] - m[4])
     .sort((a, b) => a - b);
   return heights[Math.floor(heights.length / 2)] ?? 64;
 }
 
 function metaFor(path: string, fallback: string): Meta | undefined {
-  return META[path] ?? META[fallback];
+  return (spriteMetaFor(path) ?? spriteMetaFor(fallback)) as Meta | undefined;
+}
+
+/** A pet's typical pose in art pixels: height, width and pixel unit. */
+export function petBox(pet: PetDefinition): { refH: number; fitW: number; unit: number } {
+  const metas = getShowreel(pet)
+    .map((m) => spriteMetaFor(resolveSpritePath(pet, m.action)))
+    .filter(Boolean) as Meta[];
+  if (!metas.length) return { refH: 64, fitW: 64, unit: 1 };
+  const units = new Map<number, number>();
+  metas.forEach((m) => units.set(m[2], (units.get(m[2]) || 0) + 1));
+  const unit = [...units.entries()].sort((a, b) => b[1] - a[1] || b[0] - a[0])[0][0];
+  const heights = metas.map((m) => m[6] - m[4]).sort((a, b) => a - b);
+  const widths = metas.map((m) => m[5] - m[3]).sort((a, b) => a - b);
+  return { refH: heights[Math.floor(heights.length / 2)], fitW: widths[Math.floor(widths.length / 2)], unit };
 }
 
 /* One scale per pet (not per clip), so it never changes size between moves.
@@ -45,7 +60,7 @@ function metaFor(path: string, fallback: string): Meta | undefined {
    which is what keeps every pixel square and the same size. */
 export function petScale(pet: PetDefinition, boxW: number, boxH: number, fill: number): { scale: number; unit: number } {
   const metas = getShowreel(pet)
-    .map((m) => META[resolveSpritePath(pet, m.action)])
+    .map((m) => spriteMetaFor(resolveSpritePath(pet, m.action)))
     .filter(Boolean) as Meta[];
   if (!metas.length) return { scale: 1, unit: 1 };
 
@@ -78,11 +93,12 @@ export function petScale(pet: PetDefinition, boxW: number, boxH: number, fill: n
 }
 
 export const PixelSprite: React.FC<PixelSpriteProps> = React.memo(
-  ({ pet, action, variant = pet.sprites.variant, width, height, floor = 0.8, fill = 0.56, shadow = true, className = '' }) => {
+  ({ pet, action, variant = pet.sprites.variant, width, height, floor = 0.8, fill = 0.56, shadow = true, className = '', scale: fixed }) => {
     const ref = useRef<HTMLDivElement>(null);
     const inView = useInView(ref);
 
-    const { scale, unit } = useMemo(() => petScale(pet, width, height, fill), [pet, width, height, fill]);
+    const auto = useMemo(() => (fixed ? null : petScale(pet, width, height, fill)), [fixed, pet, width, height, fill]);
+    const { scale, unit } = fixed ?? auto!;
 
     const src = resolveSpritePath(pet, action, variant);
     const meta = metaFor(src, resolveSpritePath(pet, action));

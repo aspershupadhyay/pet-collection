@@ -1,6 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { PetAction, PetDefinition, PetFolder } from '../types/pet';
-import { PetRenderer, resolveSpritePath } from './PetRenderer';
+import { resolveSpritePath } from '../utils/sprites';
+
+// The ASCII renderer (and its text-layout engine) only loads if someone picks it
+const PetRenderer = lazy(() => import('./PetRenderer').then((m) => ({ default: m.PetRenderer })));
 import { PixelSprite } from './PixelSprite';
 import { getShowreel, petHash } from '../data/showreel';
 import { useInView } from '../hooks/useInView';
@@ -220,7 +223,9 @@ export const PetCard: React.FC<PetCardProps> = ({
           />
         ) : (
           <div className="absolute inset-x-0 top-[46%] z-10 -translate-y-1/2">
-            <PetRenderer pet={pet} action={moment.action} size={Math.round(stageHeight * 0.78)} interactive={false} renderMode="ascii" lite />
+            <Suspense fallback={null}>
+              <PetRenderer pet={pet} action={moment.action} size={Math.round(stageHeight * 0.78)} interactive={false} renderMode="ascii" lite />
+            </Suspense>
           </div>
         )}
 

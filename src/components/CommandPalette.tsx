@@ -4,6 +4,9 @@ import { PET_ACTIONS } from '../data/pets';
 import { PetRenderer } from './PetRenderer';
 import { generateToolSnippet } from '../utils/toolExport';
 import { soundEngine } from '../utils/audio';
+import { CatalogItem, itemKey, KIND_LABEL } from '../types/item';
+import { itemTagline } from '../data/catalog';
+import { ItemIcon } from './items/Previews';
 import {
   Search,
   Copy,
@@ -18,6 +21,9 @@ interface CommandPaletteProps {
   onClose: () => void;
   pets: PetDefinition[];
   onSelectPet: (pet: PetDefinition) => void;
+  /** Cursors, themes and packs, matched by name and description. */
+  items?: CatalogItem[];
+  onSelectItem?: (item: CatalogItem) => void;
   onCopySuccess?: (msg: string) => void;
 }
 
@@ -35,6 +41,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onClose,
   pets,
   onSelectPet,
+  items = [],
+  onSelectItem,
   onCopySuccess,
 }) => {
   const [query, setQuery] = useState('');
@@ -57,6 +65,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       p.signatureMove.toLowerCase().includes(q)
     );
   });
+
+  const q = query.toLowerCase().trim();
+  const matchedItems = q
+    ? items.filter((i) => i.kind !== 'character' && `${i.name} ${KIND_LABEL[i.kind].one} ${itemTagline(i)}`.toLowerCase().includes(q)).slice(0, 6)
+    : [];
 
   const activePet = filteredPets[selectedIndex] || filteredPets[0] || pets[0];
 
@@ -170,10 +183,31 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       <div className="grid md:grid-cols-[1fr_18.5rem] divide-y md:divide-y-0 md:divide-x divide-dashed divide-line-strong">
         {/* Left List */}
         <div className="max-h-[24rem] overflow-y-auto p-2.5 scrollbar-none">
-          {filteredPets.length === 0 ? (
-            <div className="p-10 text-center text-small text-ink-3">
-              No companions found matching "{query}"
+          {matchedItems.length > 0 && (
+            <div className="mb-2 flex flex-col gap-1 border-b border-dashed border-line-strong pb-2">
+              {matchedItems.map((item) => (
+                <button
+                  key={itemKey(item)}
+                  type="button"
+                  onClick={() => {
+                    onSelectItem?.(item);
+                    onClose();
+                  }}
+                  className="flex items-center gap-3 rounded-[10px] p-2 text-left hover:bg-wash"
+                >
+                  <span className="grid size-8 shrink-0 place-items-center rounded-[8px] bg-well">
+                    <ItemIcon item={item} size={22} />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-body text-ink">{item.name}</span>
+                  <span className="shrink-0 text-micro text-ink-3">{KIND_LABEL[item.kind].one}</span>
+                </button>
+              ))}
             </div>
+          )}
+          {filteredPets.length === 0 ? (
+            matchedItems.length ? null : (
+              <div className="p-10 text-center text-small text-ink-3">Nothing found for "{query}"</div>
+            )
           ) : (
             <div className="flex flex-col gap-1">
               {filteredPets.map((pet, idx) => {

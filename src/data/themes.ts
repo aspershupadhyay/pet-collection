@@ -1,0 +1,118 @@
+import type { TerminalTheme } from '../types/item';
+
+/* Terminal colour schemes, one per character. ANSI order:
+   black red green yellow blue magenta cyan white, then the bright eight. */
+export const THEMES: TerminalTheme[] = [
+  {
+    id: 'void',
+    name: 'Void',
+    tagline: 'Socrates at 2 a.m.: near-black with an amber glow.',
+    description: 'A deep, warm dark theme. Amber prompts, soft violet keywords, nothing that shouts.',
+    author: 'Petcraft',
+    mood: 'dark',
+    petId: 'void_cat',
+    colors: {
+      background: '#14110f', foreground: '#e9dfd3', cursor: '#f0a24b', selection: '#3a2f27',
+      ansi: ['#2a2420', '#e2654f', '#9ccf7a', '#f0a24b', '#7aa2e8', '#c38ce6', '#6cc9c0', '#d9cfc3',
+             '#4d433c', '#ff8a73', '#b8e898', '#ffc27a', '#9cbcff', '#ddb0ff', '#94e4dc', '#fff6ea'],
+    },
+  },
+  {
+    id: 'rustacean',
+    name: 'Rustacean',
+    tagline: 'Ferris red on ocean-floor slate.',
+    description: 'Crab orange for errors you can actually read, sea green for passing builds.',
+    author: 'Petcraft',
+    mood: 'dark',
+    petId: 'ferris_crab',
+    colors: {
+      background: '#101820', foreground: '#dce6ee', cursor: '#f46b47', selection: '#22323f',
+      ansi: ['#1b2732', '#f46b47', '#4fc79a', '#f2c14e', '#4f9de8', '#c27adf', '#45c4d6', '#c8d4de',
+             '#3a4b5a', '#ff8f70', '#7ee3ba', '#ffd97a', '#7dbaff', '#dc9cf4', '#79deeb', '#f4f9fc'],
+    },
+  },
+  {
+    id: 'bathtime',
+    name: 'Bathtime',
+    tagline: 'Quackers floats on a light, bubbly page.',
+    description: 'A light theme with real contrast: deep ink on foam white, a sunny yellow cursor.',
+    author: 'Petcraft',
+    mood: 'light',
+    petId: 'rubber_duck',
+    colors: {
+      background: '#fbfaf4', foreground: '#2b2a26', cursor: '#e6a700', selection: '#f3e7b0',
+      ansi: ['#2b2a26', '#c8402c', '#3f8a2e', '#a87400', '#2c62c9', '#9a3fb8', '#167f8c', '#d8d5c8',
+             '#6f6c62', '#e0573f', '#55a742', '#c98d00', '#457ce0', '#b356d1', '#1f99a8', '#f2f0e6'],
+    },
+  },
+  {
+    id: 'kitsune',
+    name: 'Kitsune',
+    tagline: 'Fox-fire orange through a dusk forest.',
+    description: 'Ember oranges and twilight blues, for long evening sessions.',
+    author: 'Petcraft',
+    mood: 'dark',
+    petId: 'kitsune_fox',
+    colors: {
+      background: '#171522', foreground: '#ece4ee', cursor: '#ff7a3d', selection: '#2e2a42',
+      ansi: ['#24203a', '#ff6b5a', '#8fd18a', '#ffb84d', '#7f9cff', '#e083d6', '#64cfe0', '#d4cbe0',
+             '#4a4466', '#ff8f80', '#aee8a8', '#ffcf80', '#a3b9ff', '#f2a6ea', '#8fe2ef', '#fbf7fd'],
+    },
+  },
+  {
+    id: 'bamboo',
+    name: 'Bamboo',
+    tagline: 'Mochi\'s grove: green, cream and calm.',
+    description: 'Low-glare greens on a cool charcoal. Easy on the eyes for full-day work.',
+    author: 'Petcraft',
+    mood: 'dark',
+    petId: 'bamboo_panda',
+    colors: {
+      background: '#161a17', foreground: '#e3e8df', cursor: '#9ad06f', selection: '#2a332b',
+      ansi: ['#232a24', '#e0715d', '#9ad06f', '#e3c46b', '#79a7d6', '#c191d6', '#73c4b0', '#cfd6ca',
+             '#465047', '#f08f7d', '#b9e894', '#f2d98f', '#9cc2ea', '#d6aeea', '#98dcc9', '#f7faf4'],
+    },
+  },
+  {
+    id: 'celestial',
+    name: 'Celestial',
+    tagline: 'Celestia\'s night sky in pastel ink.',
+    description: 'Indigo night with lilac, rose and starlight accents.',
+    author: 'Petcraft',
+    mood: 'dark',
+    petId: 'magical_unicorn',
+    colors: {
+      background: '#14132a', foreground: '#ebe7ff', cursor: '#c9a7ff', selection: '#2c2952',
+      ansi: ['#221f42', '#ff7aa8', '#8ee6c0', '#ffd98a', '#8aa8ff', '#c9a7ff', '#7fe0f0', '#d8d2f2',
+             '#47437a', '#ff9cc0', '#adf2d4', '#ffe7ad', '#abc0ff', '#ddc4ff', '#a4ecf7', '#ffffff'],
+    },
+  },
+  {
+    id: 'deep-sea',
+    name: 'Deep Sea',
+    tagline: 'Finley\'s reef, twenty metres down.',
+    description: 'Teal and coral on midnight blue, with a bioluminescent cursor.',
+    author: 'Petcraft',
+    mood: 'dark',
+    petId: 'finley_fish',
+    colors: {
+      background: '#08161e', foreground: '#d6eef2', cursor: '#3ee6d0', selection: '#14303d',
+      ansi: ['#0f2430', '#ff7b6b', '#4fd8a0', '#f5cf66', '#4ea8ff', '#b48cff', '#3ee6d0', '#c4dde3',
+             '#2a4a58', '#ff9d90', '#7eeabf', '#ffe08f', '#7ec2ff', '#cdafff', '#78f2e2', '#f0fbfd'],
+    },
+  },
+  {
+    id: 'parchment',
+    name: 'Parchment',
+    tagline: 'Master Oogway reads your logs by lamplight.',
+    description: 'A warm paper light theme with ink-brown text and sage accents.',
+    author: 'Petcraft',
+    mood: 'light',
+    petId: 'zen_turtle',
+    colors: {
+      background: '#f4ecdc', foreground: '#3a2f22', cursor: '#7a8f4e', selection: '#e3d5b8',
+      ansi: ['#3a2f22', '#b4442e', '#5d7f2f', '#a06a12', '#3d63a3', '#8b4a8f', '#2f7f78', '#d9ccb0',
+             '#7d6c56', '#cc5a42', '#739a3d', '#bd821e', '#527bbd', '#a35fa8', '#3c9890', '#fbf6ea'],
+    },
+  },
+];

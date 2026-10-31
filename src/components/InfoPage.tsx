@@ -1,5 +1,7 @@
+import { asset } from '../utils/asset';
 import React, { useEffect, useRef, useState } from 'react';
 import { PETS } from '../data/pets';
+import { BRAND } from '../collection';
 
 interface InfoPageProps {
   onOpenSubmit: () => void;
@@ -8,7 +10,7 @@ interface InfoPageProps {
 }
 
 /* Edit these before launch — placeholder pricing and contact. */
-const SPONSOR_EMAIL = 'sponsor@petcraft.xyz';
+const SPONSOR_EMAIL = BRAND.sponsorEmail;
 const SPONSOR_PLACEMENTS = [
   {
     id: 'sidebar',
@@ -26,18 +28,18 @@ const SPONSOR_PLACEMENTS = [
     id: 'featured',
     name: 'Featured companion',
     price: '$149',
-    body: 'A companion drawn in your brand colours, pinned first in Finds for the week.',
+    body: 'A companion drawn in your brand colours, pinned first on the wall for the week.',
   },
 ] as const;
 
 const FAQ: { q: string; a: React.ReactNode }[] = [
   {
-    q: 'What is Petcraft?',
-    a: 'A hand-picked collection of animated pixel pets that live next to your code. Every companion ships with a full set of moves, several coats, and ready-made configs for Claude Code /buddy, VS Code Pets, Orca CLI, Cursor and React.',
+    q: `What is ${BRAND.name}?`,
+    a: 'A premium collection of animated pixel characters, cursor sets, terminal themes and packs for the tools you code in. Every character ships with a full set of moves, several coats and ready-made configs for Claude Code /buddy, VS Code Pets, Orca CLI, Cursor and React.',
   },
   {
-    q: 'How do I add a pet to my editor or terminal?',
-    a: 'Open any card, choose your tool in the export panel and copy the snippet. Each one is a complete config, so it pastes straight in.',
+    q: 'How do I install something?',
+    a: 'Open any card. Characters export to your editor or terminal tool, themes to Ghostty, Kitty, Alacritty, WezTerm, Windows Terminal and VS Code, and cursor sets to CSS or SVG. Packs download as one file with everything inside.',
   },
   {
     q: 'Why do the cards keep moving?',
@@ -49,7 +51,7 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: 'Do I need an account?',
-    a: 'No. Favourites, folders and your own submissions are saved in this browser.',
+    a: 'Not to browse. Favourites and folders are saved in this browser. To post in the Showcase you sign in with an email link or GitHub, so every submission has a real person behind it.',
   },
   {
     q: 'Can I use it as an app?',
@@ -141,7 +143,7 @@ const PlacementPreview: React.FC<{ id: (typeof SPONSOR_PLACEMENTS)[number]['id']
     <div className="pc-tier-legendary relative h-[4.6rem] w-[5.6rem] overflow-hidden rounded-[10px] bg-page shadow-[inset_0_0_0_1px_var(--line)]">
       <div className="pc-foil-ring" />
       <span className="absolute left-1.5 top-1.5 font-mono text-[7px] uppercase tracking-[0.14em] text-[#f0a92e]">Featured</span>
-      <img src="/sprites/fox/red_idle_8fps.gif" alt="" className="pixelated absolute bottom-1 left-1/2 size-10 -translate-x-1/2 object-contain" />
+      <img src={asset('/sprites/fox/red_idle_8fps.gif')} alt="" className="pixelated absolute bottom-1 left-1/2 size-10 -translate-x-1/2 object-contain" />
     </div>
   );
 };
@@ -171,10 +173,10 @@ export const InfoPage: React.FC<InfoPageProps> = ({ onOpenSubmit, focusSponsor }
       {/* Title */}
       <header className="mx-auto max-w-[36rem] pt-14 text-center sm:pt-20">
         <h1 className="font-display text-[28px] font-medium leading-[1.15] tracking-[-0.02em] text-ink sm:text-[32px]">
-          About Petcraft
+          About {BRAND.name}
         </h1>
         <p className="mt-3 text-[15px] leading-[1.6] text-pretty text-ink-3">
-          Petcraft is a hand-picked collection of pixel companions that live next to your code, in Claude Code, your editor or your terminal.
+          {BRAND.description}
         </p>
       </header>
 
@@ -258,14 +260,14 @@ export const InfoPage: React.FC<InfoPageProps> = ({ onOpenSubmit, focusSponsor }
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-[30rem]">
               <h2 id="info-sponsor" className="font-display text-[17px] font-medium text-ink">
-                Sponsor Petcraft
+                Sponsor {BRAND.name}
               </h2>
               <p className="mt-2 text-[15px] leading-[1.7] text-ink-3">
                 Put your product in front of people who build with AI tools every day. One sponsor per slot, booked by the week.
               </p>
             </div>
             <a
-              href={`mailto:${SPONSOR_EMAIL}?subject=${encodeURIComponent('Petcraft sponsorship')}`}
+              href={`mailto:${SPONSOR_EMAIL}?subject=${encodeURIComponent(`${BRAND.name} sponsorship`)}`}
               className="surface surface-primary inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-body font-medium text-white"
             >
               Book a slot

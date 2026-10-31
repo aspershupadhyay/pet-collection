@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PetCategory, PetDefinition } from '../types/pet';
-import { PET_CATEGORIES, PETS } from '../data/pets';
+import { PetCategory } from '../types/pet';
+import type { CatalogItem, CursorSet } from '../types/item';
+import { PET_CATEGORIES } from '../data/pets';
+import { COLLECTION, BRAND } from '../collection';
+import { itemByKey } from '../data/catalog';
+import { ItemIcon, CursorGlyph } from './items/Previews';
 import { NavSection } from './Sidebar';
-import { PetcraftMark } from './PetcraftMark';
+import { BrandMark } from './PetcraftMark';
 import { usePwaInstall } from '../pwa/pwa';
-import { useCustomCursor } from '../hooks/useCustomCursor';
 import { Download } from 'lucide-react';
 
 interface HeaderProps {
@@ -22,7 +25,12 @@ interface HeaderProps {
   onOpenStudio: () => void;
   onOpenInfo: () => void;
   onOpenSubmit: () => void;
-  onSelectPet: (pet: PetDefinition) => void;
+  onOpenItem: (item: CatalogItem) => void;
+  /** Characters get the full filter row; other sections don't need it. */
+  showFilters: boolean;
+  wornCursor: CursorSet | null;
+  onClearCursor: () => void;
+  onBrowseCursors: () => void;
   darkMode: boolean;
   onChangeDarkMode: (value: boolean) => void;
   muted: boolean;
@@ -41,41 +49,6 @@ const SORT_OPTIONS: { id: SortMode; label: string }[] = [
   { id: 'name', label: 'A–Z' },
 ];
 
-const SECTION_HEADERS: Record<NavSection, { title: string; subtitle: string }> = {
-  finds: {
-    title: 'A living collection of pixel companions.',
-    subtitle: 'Every card is a short loop of what that pet does beside your code. Open one to make it yours.',
-  },
-  inspiration: {
-    title: 'Mythical, feathered and from the deep.',
-    subtitle: 'The more unusual companions: spirits, unicorns, birds and creatures of the sea.',
-  },
-  resources: {
-    title: 'Companions with the most to unpack.',
-    subtitle: 'Pets with several coats or a pixel habitat to drop into your own projects.',
-  },
-  tools: {
-    title: 'Made for your terminal and editor.',
-    subtitle: 'Companions tuned for Claude Code, Orca CLI, Cursor and Codex.',
-  },
-  portfolios: {
-    title: 'The whole cast, one card each.',
-    subtitle: 'Every companion in the collection, side by side.',
-  },
-  favourites: {
-    title: 'Your favourites.',
-    subtitle: 'Companions you starred, saved in this browser.',
-  },
-  folders: {
-    title: 'Your folders.',
-    subtitle: 'Group companions by project, editor or mood.',
-  },
-  info: {
-    title: 'About Petcraft',
-    subtitle: '',
-  },
-};
-
 const COLOR_SWATCHES = [
   { id: 'all', label: 'All colours', hex: 'conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)' },
   { id: 'orange', label: 'Warm & Amber', hex: '#f97316' },
@@ -85,23 +58,8 @@ const COLOR_SWATCHES = [
   { id: 'dark', label: 'Obsidian & Mono', hex: '#27272a' },
 ];
 
-const HEADER_SPONSORS = [
-  {
-    petId: 'void_cat',
-    name: 'Claude Code /buddy',
-    icon: '/sprites/cat/orange_idle_8fps.gif',
-  },
-  {
-    petId: 'ferris_crab',
-    name: 'Orca CLI',
-    icon: '/sprites/crab/red_idle_8fps.gif',
-  },
-  {
-    petId: 'rubber_duck',
-    name: 'VS Code Pets',
-    icon: '/sprites/rubber-duck/yellow_idle_8fps.gif',
-  },
-];
+const HAS_CHARACTERS = COLLECTION.kinds.includes('character');
+const HEADER_PICKS = COLLECTION.featured.filter((f) => f.key).slice(0, 3);
 
 export const Header: React.FC<HeaderProps> = ({
   selectedCategory,
@@ -118,7 +76,11 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenStudio,
   onOpenInfo,
   onOpenSubmit,
-  onSelectPet,
+  onOpenItem,
+  showFilters,
+  wornCursor,
+  onClearCursor,
+  onBrowseCursors,
   darkMode,
   onChangeDarkMode,
   muted,
@@ -133,7 +95,6 @@ export const Header: React.FC<HeaderProps> = ({
   const [moreCatsOpen, setMoreCatsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { canInstall, install, installed } = usePwaInstall();
-  const { customCursor, onChangeCustomCursor } = useCustomCursor();
 
   const settingsRef = useRef<HTMLDivElement>(null);
   const colorRef = useRef<HTMLDivElement>(null);
@@ -175,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const currentHero = SECTION_HEADERS[activeNav] || SECTION_HEADERS.finds;
+  const currentHero = COLLECTION.heroes[activeNav] ?? COLLECTION.heroes[COLLECTION.sections[0]] ?? { title: BRAND.tagline, subtitle: '' };
   const visibleCategories = PET_CATEGORIES.slice(0, 4);
   const overflowCategories = PET_CATEGORIES.slice(4);
   const activeSwatch = COLOR_SWATCHES.find((c) => c.id === selectedColorFilter) || COLOR_SWATCHES[0];
@@ -184,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      {/* Top 3-Column Desktop Header (h-16 grid-cols-[1fr_auto_1fr]) - Exact designeer.xyz DOM */}
+      {/* Desktop top bar */}
       <div
         style={{ viewTransitionName: 'page-header' }}
         className="-mx-[16px] relative z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center px-[16px] max-lg:hidden"
@@ -193,6 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Left: Login / Sandbox pill + Favourites + Info */}
         <nav aria-label="Site" className="flex items-center gap-5">
+          {HAS_CHARACTERS && (
           <button
             type="button"
             onClick={onOpenStudio}
@@ -200,6 +162,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             Sandbox
           </button>
+          )}
           <button
             type="button"
             onClick={() => onSelectNav('favourites')}
@@ -236,28 +199,23 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right: Quick Sponsor Icons + Plus Button + 3D Keycap Submit + Settings Gear */}
         <div className="page-header-actions flex items-center justify-end gap-3">
           <div className="flex items-center gap-3">
-            {HEADER_SPONSORS.map((sp) => (
-              <button
-                key={sp.petId}
-                type="button"
-                title={sp.name}
-                aria-label={`${sp.name}, featured companion`}
-                onClick={() => {
-                  const found = PETS.find((p) => p.id === sp.petId);
-                  if (found) onSelectPet(found);
-                }}
-                className="tap inline-flex rounded-lg bg-well p-0.5 ring-1 ring-line transition-transform hover:scale-105 active:scale-95"
-              >
-                <img
-                  src={sp.icon}
-                  alt=""
-                  width={28}
-                  height={28}
-                  style={{ width: 26, height: 26 }}
-                  className="shrink-0 rounded-md object-contain pixelated"
-                />
-              </button>
-            ))}
+            {HEADER_PICKS.map((pick) => {
+              const item = itemByKey(pick.key);
+              if (!item) return null;
+              return (
+                <button
+                  key={pick.key}
+                  type="button"
+                  title={`${pick.title} · ${pick.label}`}
+                  aria-label={`${pick.title}, ${pick.label}`}
+                  onClick={() => onOpenItem(item)}
+                  className="tap grid size-[30px] place-items-center rounded-lg bg-well ring-1 ring-line transition-transform hover:scale-105 active:scale-95"
+                >
+                  <ItemIcon item={item} size={24} />
+                </button>
+              );
+            })}
+            {HAS_CHARACTERS && (
             <button
               type="button"
               onClick={onOpenSubmit}
@@ -269,6 +227,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <path d="M12.001 5C12.001 9.6674 12.001 14.3347 12.001 19.002M19.002 12.002C14.3347 12.002 9.6673 12.002 5 12.002" />
               </svg>
             </button>
+            )}
           </div>
 
           {/* 3D Skueomorphic Keycap Button */}
@@ -398,57 +357,36 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 </div>
 
-                {/* Custom cursor — pixel paw / system pointer segmented pill */}
+                {/* Cursor set worn across the site */}
                 <div className="flex w-full items-center justify-between gap-2 rounded-[8px] px-2.5 py-1.5">
-                  <span className="text-body text-ink">Custom cursor</span>
-                  <div
-                    role="group"
-                    aria-label="Custom cursor"
-                    className="flex shrink-0 items-center gap-0.5 rounded-full bg-well p-0.5 shadow-[inset_0_0_0_1px_var(--line)]"
-                  >
+                  <span className="text-body text-ink">Cursor</span>
+                  {wornCursor ? (
                     <button
                       type="button"
-                      role="radio"
-                      aria-checked={customCursor}
-                      aria-label="Pixel paw cursor"
-                      title="Pixel paw cursor"
-                      onClick={() => onChangeCustomCursor(true)}
-                      className={`tap grid size-6 place-items-center rounded-full transition-[color,background-color] duration-150 ${
-                        customCursor
-                          ? 'bg-page text-ink shadow-[inset_0_0_0_1px_var(--line-strong)]'
-                          : 'text-ink-3 hover:text-ink'
-                      }`}
+                      onClick={onClearCursor}
+                      title="Back to the system cursor"
+                      className="flex items-center gap-1.5 rounded-full bg-well px-2 py-0.5 text-micro font-medium text-ink-2 hover:text-ink"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <ellipse cx="12.2" cy="15.6" rx="4.6" ry="3.6" />
-                        <ellipse cx="6.3" cy="10.8" rx="1.9" ry="2.4" />
-                        <ellipse cx="9.9" cy="7" rx="1.9" ry="2.5" />
-                        <ellipse cx="14.5" cy="6.8" rx="1.9" ry="2.5" />
-                        <ellipse cx="18.1" cy="10.6" rx="1.9" ry="2.4" />
-                      </svg>
+                      <CursorGlyph set={wornCursor} role="pointer" px={0.9} />
+                      {wornCursor.name} ×
                     </button>
+                  ) : (
                     <button
                       type="button"
-                      role="radio"
-                      aria-checked={!customCursor}
-                      aria-label="System cursor"
-                      title="System cursor"
-                      onClick={() => onChangeCustomCursor(false)}
-                      className={`tap grid size-6 place-items-center rounded-full transition-[color,background-color] duration-150 ${
-                        !customCursor
-                          ? 'bg-page text-ink shadow-[inset_0_0_0_1px_var(--line-strong)]'
-                          : 'text-ink-3 hover:text-ink'
-                      }`}
+                      onClick={() => {
+                        setSettingsOpen(false);
+                        onBrowseCursors();
+                      }}
+                      className="rounded-full bg-well px-2 py-0.5 text-micro font-medium text-ink-2 hover:text-ink"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M4.5 3.5 10.9 18.8l2.2-6.1 6.1-2.2L4.5 3.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-                      </svg>
+                      System · Browse
                     </button>
-                  </div>
+                  )}
                 </div>
 
                 <hr className="my-1 border-t border-dashed border-line" />
 
+                {HAS_CHARACTERS && (
                 <button
                   type="button"
                   onClick={() => onChangeRenderMode(renderMode === 'pixel' ? 'ascii' : 'pixel')}
@@ -459,6 +397,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {renderMode === 'pixel' ? '8fps Pixel' : 'Claude /buddy'}
                   </span>
                 </button>
+                )}
                 {(canInstall || installed) && (
                   <button
                     type="button"
@@ -478,6 +417,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </button>
                 )}
                 <hr className="my-1 border-t border-dashed border-line" />
+                {HAS_CHARACTERS && (
                 <button
                   type="button"
                   onClick={() => {
@@ -489,28 +429,30 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>Multi-Pet Sandbox</span>
                   <span className="text-micro text-ink-3">Open ↗</span>
                 </button>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Mobile Intro Section (lg:hidden) - Exact designeer.xyz mobile hero */}
+      {/* Mobile intro */}
       <section
         data-mobile-intro="true"
-        aria-label="About Petcraft"
+        aria-label={`About ${BRAND.name}`}
         className="flex flex-col pt-4 pb-6 lg:hidden"
       >
         <div className="flex items-start justify-between">
           <button
             type="button"
-            onClick={() => onSelectNav('finds')}
-            aria-label="PetCraft.xyz, home"
+            onClick={() => onSelectNav(COLLECTION.sections[0])}
+            aria-label={`${BRAND.name}, home`}
             className="group/brand tap rounded-2xl"
           >
-            <PetcraftMark size={72} />
+            <BrandMark size={72} />
           </button>
           <div className="-mt-1 -mr-2 flex items-center gap-1.5">
+            {HAS_CHARACTERS && (
             <button
               type="button"
               onClick={onOpenStudio}
@@ -518,6 +460,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Sandbox
             </button>
+            )}
             <button
               type="button"
               onClick={onOpenInfo}
@@ -537,17 +480,17 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
         <button
           type="button"
-          onClick={() => onSelectNav('finds')}
+          onClick={() => onSelectNav(COLLECTION.sections[0])}
           className="tap mt-5 flex w-fit items-center rounded-full font-pixel text-[19px] leading-none text-ink"
         >
-          petcraft<span className="pc-mark-blink text-[#5b7cff]">_</span>
+          {BRAND.wordmark}<span className="pc-mark-blink text-[#5b7cff]">_</span>
         </button>
         <p className="mt-4 text-[15px] leading-[1.6] text-pretty text-ink">
-          A hand-picked collection of pixel companions that live next to your code.
+          {BRAND.intro}
         </p>
       </section>
 
-      {/* Centered Editorial Hero Title (Hidden in List view, just like designeer.xyz) */}
+      {/* Section hero */}
       {viewMode !== 'list' && !isInfo && (
         <section className="mx-auto flex max-w-[36rem] flex-col items-center gap-2 px-0 pt-7 pb-6 text-center sm:gap-2.5 sm:px-4 sm:pt-16 sm:pb-[2.95rem]">
           <h1 className="font-display text-[22px] leading-[1.25] sm:text-[20px] sm:leading-[1.2] font-medium tracking-[-0.02em] text-balance text-ink">
@@ -559,8 +502,8 @@ export const Header: React.FC<HeaderProps> = ({
         </section>
       )}
 
-      {/* Sticky filter row */}
-      {!isInfo && (
+      {/* Sticky filter row (characters only) */}
+      {!isInfo && showFilters && (
       <div
         data-filter-row="true"
         className="sticky top-0 isolate z-20 -mx-[16px] flex items-center gap-2 sm:gap-3 px-[16px] pt-1 pb-3 sm:pt-4 sm:pb-5"
@@ -649,7 +592,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right: View Switcher + All colours conic wheel + Recent/Action dropdown */}
         <div className="shrink-0 sm:ml-auto">
           <div className="flex items-center gap-1.5 sm:gap-3">
-            {/* Tile / List / Canvas View Switcher (Exact designeer.xyz group) */}
+            {/* Tile / List / Canvas */}
             <div
               role="group"
               aria-label="View"

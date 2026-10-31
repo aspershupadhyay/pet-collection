@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { PetAction, PetDefinition } from '../types/pet';
-import { resolveSpritePath } from '../components/PetRenderer';
+import { resolveSpritePath } from '../utils/sprites';
 import { getShowreel } from '../data/showreel';
 import { loadVoxelClip } from './voxel';
 import { VoxelPet, makeContactShadow, addStudioLights } from './VoxelPet';

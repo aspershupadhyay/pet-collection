@@ -1,0 +1,55 @@
+import type { SpritePack } from '../types/item';
+
+/* Packs bundle characters with the theme and cursor that go with them. */
+export const PACKS: SpritePack[] = [
+  {
+    id: 'terminal-buddies',
+    name: 'Terminal Buddies',
+    tagline: 'The four that live in a terminal best.',
+    description: 'Socrates, Kitsune, Quackers and Ferris, with the Void theme and the Paw Print cursor.',
+    petIds: ['void_cat', 'kitsune_fox', 'rubber_duck', 'ferris_crab'],
+    themeId: 'void',
+    cursorId: 'paw-print',
+    accent: '#e7883a',
+  },
+  {
+    id: 'rustacean-kit',
+    name: 'Rustacean Kit',
+    tagline: 'Everything a crab-friendly setup needs.',
+    description: 'Ferris and Finley, the Rustacean theme and the Ferris Claw cursor.',
+    petIds: ['ferris_crab', 'finley_fish', 'garden_snail'],
+    themeId: 'rustacean',
+    cursorId: 'ferris-claw',
+    accent: '#e0533d',
+  },
+  {
+    id: 'mythic-squad',
+    name: 'Mythic Squad',
+    tagline: 'Spirits, unicorns and things that change shape.',
+    description: 'The rarest characters in the collection, with the Celestial theme and the Starlight cursor.',
+    petIds: ['totoro_spirit', 'magical_unicorn', 'morph_shapeshifter', 'kitsune_fox'],
+    themeId: 'celestial',
+    cursorId: 'starlight',
+    accent: '#a78bfa',
+  },
+  {
+    id: 'quiet-garden',
+    name: 'Quiet Garden',
+    tagline: 'Slow companions for focused days.',
+    description: 'Oogway, Mochi, Shelly and Rocky, with the Bamboo theme and the Moss cursor.',
+    petIds: ['zen_turtle', 'bamboo_panda', 'garden_snail', 'mossy_rocky'],
+    themeId: 'bamboo',
+    cursorId: 'moss',
+    accent: '#5fae4e',
+  },
+  {
+    id: 'night-shift',
+    name: 'Night Shift',
+    tagline: 'For people who ship after midnight.',
+    description: 'Skelly, Zappy and Jimothy, with the Deep Sea theme and the Boo cursor.',
+    petIds: ['skeleton_warrior', 'zappy_bolt', 'jimothy_raccoon'],
+    themeId: 'deep-sea',
+    cursorId: 'boo',
+    accent: '#3ee6d0',
+  },
+];

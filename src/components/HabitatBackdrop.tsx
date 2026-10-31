@@ -1,3 +1,4 @@
+import { asset } from '../utils/asset';
 import React from 'react';
 import { PetHabitat } from '../types/pet';
 
@@ -35,7 +36,7 @@ export const HabitatBackdrop: React.FC<{ habitat: PetHabitat; tint?: string }> =
         key={habitat}
         className="habitat-fade absolute inset-0 pixelated"
         style={{
-          backgroundImage: `url(/sprites/backgrounds/${habitat}/background-dark-medium.png)`,
+          backgroundImage: `url(${asset(`/sprites/backgrounds/${habitat}/background-dark-medium.png`)})`,
           backgroundRepeat: 'repeat-x',
           backgroundPosition: 'center bottom',
           backgroundSize: 'auto 92%',

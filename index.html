@@ -13,18 +13,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="PetCraft" />
-    <meta name="application-name" content="PetCraft" />
-    <title>PetCraft.xyz — Interactive AI Companions & Tool Pets</title>
-    <meta name="description" content="Curated collection of 27 interactive AI companion pets with 11 realistic actions for Claude Code, ChatGPT, Orca, Cursor, CLI, and web apps. Install as an app and browse offline." />
-    <meta property="og:title" content="PetCraft.xyz — Interactive AI Companions & Tool Pets" />
-    <meta property="og:description" content="27 interactive pixel AI companions with 11 skeletal actions. Inspect, play, and export to Claude Code /buddy, VS Code Pets, Orca CLI, and Cursor." />
-    <meta property="og:image" content="/icons/icon-512.png" />
+    <meta name="apple-mobile-web-app-title" content="%BRAND_NAME%" />
+    <meta name="application-name" content="%BRAND_NAME%" />
+    <title>%BRAND_NAME% — %BRAND_TAGLINE%</title>
+    <meta name="description" content="%BRAND_DESCRIPTION%" />
+    <meta property="og:title" content="%BRAND_NAME% — %BRAND_TAGLINE%" />
+    <meta property="og:description" content="%BRAND_DESCRIPTION%" />
+    <meta property="og:image" content="%BASE_URL%icons/icon-512.png" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700;800&family=Funnel+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600&family=Funnel+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Silkscreen:wght@400&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600&family=Funnel+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Silkscreen:wght@400&display=swap" rel="stylesheet">
     <script>
       (function() {
         try {
@@ -38,6 +39,7 @@
   </head>
   <body class="hatch min-h-full font-sans antialiased text-ink">
     <div id="root"></div>
+    <noscript><p style="padding:2rem;font-family:system-ui">%BRAND_NAME% needs JavaScript to show the collection.</p></noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

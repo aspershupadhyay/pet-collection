@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, claude/optimistic-gauss-v1ppii]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          # Served from https://<user>.github.io/<repo>/
+          BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_COLLECTION: ${{ vars.VITE_COLLECTION || 'petcraft' }}
+          # Optional: add these as repository secrets to turn on accounts,
+          # showcase uploads and shared view counts (see supabase/schema.sql)
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: SPA fallback for deep links
+        run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+
+      - name: Publish to the gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
+          commit_message: 'Deploy ${{ github.sha }}'
