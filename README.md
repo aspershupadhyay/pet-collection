@@ -85,6 +85,18 @@ src/
 supabase/schema.sql database, policies, storage
 ```
 
-## Asset licensing
+## Original characters
 
-The cat sprites in `public/sprites/cat` belong to the "catset" by seethingswarm, whose author asks that they not be redistributed (see `public/sprites/README.md`). Before a public launch, either buy a licence for the set or replace those sprites.
+Miso, Moku, Beep, Hoot, Ember, Puff, Glim and Chip are Petcraft originals. They are generated from code in `scripts/characters/`:
+
+```bash
+node scripts/characters/build.mjs --preview /tmp/cast.png   # GIFs for every coat and move, plus a preview sheet
+node scripts/sprite-meta.mjs                                 # refresh sprite measurements
+```
+
+To add a character, write a `draw(g, pose)` function in `cast.mjs`. The engine handles the outline, shading, eyes and every move (idle, walk, run, sleep, swipe, ball, jump, special).
+
+## Rendering
+
+- **2D:** GIFs are decoded once, snapped back to their true pixel grid and drawn on a canvas at the screen's real resolution with smoothing off, so pixels stay sharp at any size.
+- **3D:** every art pixel becomes a voxel column with a rounded, plush-like depth. The back of each character shows its body colour instead of a mirrored face.

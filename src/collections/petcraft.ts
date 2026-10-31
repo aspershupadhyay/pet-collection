@@ -43,7 +43,8 @@ const config: CollectionConfig = {
     folders: { title: 'Your folders.', subtitle: 'Group characters, cursors and themes by project or mood.' },
   },
   featured: [
-    { key: 'void_cat', title: 'Socrates', label: 'Character of the week', description: 'The night-shift cat. Naps on your build, wakes up for the bugs.' },
+    { key: 'miso_cat', title: 'Miso', label: 'New original', description: 'A round little tabby who yawns through your builds. Drawn by Petcraft.' },
+    { key: 'moku_spirit', title: 'Moku', label: 'New original', description: 'A mossy forest spirit that blooms when your build goes green.' },
     { key: 'theme:rustacean', title: 'Rustacean', label: 'New theme', description: 'Ferris red on ocean slate, with configs for six terminals.' },
     { key: 'cursor:quack', title: 'Quack', label: 'New cursor set', description: 'A rubber-duck cursor that points at the bug for you.' },
     { key: '', title: 'Your product here', label: 'Open slot', description: 'Put your product in front of people who build with AI tools every day.' },

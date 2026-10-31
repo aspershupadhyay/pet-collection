@@ -34,13 +34,18 @@ const CANDIDATES: { action: PetAction; caption: (pet: PetDefinition) => string }
 /* Each companion's own take on every moment. Anything missing falls back to
    the generic caption above. Keep lines short: they share a card with the pet. */
 const PET_LINES: Record<string, Partial<Record<PetAction, string>>> = {
+  miso_cat: { idle: 'Sits on your keyboard', walk: 'Pads along the status bar', code: 'Swats the blinking cursor', play: 'Bats the ball around', celebrate: 'Pounces on a merge', sleep: 'Loafs through the build', special: 'One enormous yawn', dance: 'Zooms for no reason' },
+  moku_spirit: { idle: 'Breathes in the forest air', walk: 'Shuffles between tabs', code: 'Waves a twig at the bug', play: 'Rolls a seed about', celebrate: 'Hops over the canopy', sleep: 'Naps in the moss', special: 'Blooms on a green build', dance: 'Rustles happily' },
+  beep_bot: { idle: 'Blinks its antenna', walk: 'Rolls over to help', code: 'Points at line 42', play: 'Plays catch with a byte', celebrate: 'Hops on a passing test', sleep: 'Screen dims to standby', special: 'Shows a compile heart', dance: 'Spins its wheels' },
+  hoot_owl: { idle: 'Keeps watch at night', walk: 'Waddles along the branch', code: 'Flaps at a failing test', play: 'Juggles a moon', celebrate: 'Hops for a clean diff', sleep: 'Dozes standing up', special: 'Winks at a clever fix', dance: 'Bobs to the build log' },
+  ember_sprite: { idle: 'Flickers by your prompt', walk: 'Drifts across the logs', code: 'Sparks at a stack trace', play: 'Bounces a hot ball', celebrate: 'Leaps on deploy', sleep: 'Banks down to a glow', special: 'Flares on ship day', dance: 'Crackles in place' },
+  puff_sheep: { idle: 'Hovers, perfectly fluffy', walk: 'Trots on cloud legs', code: 'Nudges a flaky test', play: 'Bounces a raindrop', celebrate: 'Springs into the sky', sleep: 'Settles into a nap', special: 'Brings a little weather', dance: 'Prances in place' },
+  glim_jelly: { idle: 'Drifts on the current', walk: 'Pulses along the bottom', code: 'Lights up the bug', play: 'Bops a bubble', celebrate: 'Shoots up for joy', sleep: 'Settles on the sand', special: 'Glows in the dark', dance: 'Ripples its tentacles' },
+  chip_hamster: { idle: 'Holds a seed, twitching', walk: 'Scurries to the next file', code: 'Paws at a typo', play: 'Rolls a ball along', celebrate: 'Jumps on save', sleep: 'Naps flat as a dumpling', special: 'Stuffs its cheeks', dance: 'Runs the wheel' },
   akita_inu: { idle: 'Sits by your prompt', walk: 'Walks the terminal beat', code: 'Guards the test run', play: 'Fetches a stray ball', celebrate: 'Bolts when tests pass', sleep: 'Dozes, one ear up' },
-  totoro_spirit: { idle: 'Breathes like a forest', walk: 'Pads across your tabs', code: 'Shakes acorns loose', play: 'Bounces a seed', celebrate: 'Leaps over the canopy', sleep: 'Naps on a tab' },
   kitsune_fox: { idle: 'Watches your cursor', walk: 'Trots through autumn', code: 'Pounces on a bug', play: 'Chases the ball', celebrate: 'Dashes on deploy', sleep: 'Curls up for deep work' },
-  void_cat: { idle: 'Judges your commits', walk: 'Strolls the status bar', code: 'Swipes at your cursor', play: 'Bats the ball around', celebrate: 'Zooms after a merge', sleep: 'Lands on all fours' },
   ferris_crab: { idle: 'Waits on cargo build', walk: 'Scuttles sideways', code: 'Pinches a borrow error', play: 'Juggles a lifetime', celebrate: 'Zero panics, full sprint' },
   rubber_duck: { idle: 'Listens. Just listens.', walk: 'Waddles to the bug', code: 'Quacks at line 42', play: 'Bobs with the ball', celebrate: 'Race condition solved' },
-  clippy_assistant: { idle: 'Has a suggestion', walk: 'Wiggles a little closer', code: 'Refactors, unasked', play: 'Plays fetch with a doc', celebrate: 'Was right all along' },
   deno_dino: { idle: 'Checks permissions', walk: 'Stomps through TS', code: 'Blocks --allow-all', play: 'Kicks a dependency', celebrate: 'No build step needed' },
   bamboo_panda: { idle: 'Chews on bamboo', walk: 'Ambles to the snacks', code: 'Swats a warning away', play: 'Rolls with the ball', celebrate: 'Tumbles on a merge', sleep: 'Belly-flops for a nap', dance: 'Waddles at full speed' },
   jimothy_raccoon: { idle: 'Eyes your node_modules', walk: 'Sneaks past the linter', code: 'Steals unused imports', play: 'Found a shiny ball', celebrate: 'Bundle shrank 40%', sleep: 'Sleeps till midnight' },

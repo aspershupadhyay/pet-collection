@@ -14,7 +14,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({ onClose, onAddPet }) =
   const [tagline, setTagline] = useState('');
   const [toolOrigin, setToolOrigin] = useState<PetDefinition['toolOrigin']>('Claude Code');
   const [category, setCategory] = useState<PetDefinition['category']>('Cyber & AI');
-  const [templateId, setTemplateId] = useState('void_cat');
+  const [templateId, setTemplateId] = useState('miso_cat');
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {

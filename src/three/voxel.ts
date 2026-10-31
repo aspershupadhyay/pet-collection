@@ -1,4 +1,4 @@
-import { parseGIF, decompressFrames } from 'gifuct-js';
+import { decodeGif } from '../utils/gifDecode';
 import { spriteMetaFor } from '../data/meta';
 
 /* Turns an 8fps pixel GIF into stacks of voxels, one per art pixel. Depth
@@ -8,7 +8,7 @@ import { spriteMetaFor } from '../data/meta';
 
 export interface VoxelFrame {
   count: number;
-  /** x, y, thickness per voxel */
+  /** x, y, depth, z-centre per voxel column */
   cells: Float32Array;
   /** r, g, b per voxel, already in linear space for three.js */
   colors: Float32Array;
@@ -27,45 +27,6 @@ const MAX_GRID = 72;
 
 const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
 const cache = new Map<string, Promise<VoxelClip>>();
-
-async function decodeFrames(url: string) {
-  const res = await fetch(url);
-  const buf = await res.arrayBuffer();
-  const gif = parseGIF(buf);
-  const frames = decompressFrames(gif, true);
-  const W = gif.lsd.width;
-  const H = gif.lsd.height;
-  const canvas = new Uint8ClampedArray(W * H * 4);
-  const out: { pixels: Uint8ClampedArray; delay: number }[] = [];
-
-  for (const f of frames) {
-    const { width: w, height: h, left, top } = f.dims;
-    const before = f.disposalType === 3 ? canvas.slice() : null;
-    for (let y = 0; y < h; y += 1) {
-      for (let x = 0; x < w; x += 1) {
-        const si = (y * w + x) * 4;
-        if (f.patch[si + 3] === 0) continue;
-        const cx = left + x;
-        const cy = top + y;
-        if (cx >= W || cy >= H) continue;
-        const di = (cy * W + cx) * 4;
-        canvas[di] = f.patch[si];
-        canvas[di + 1] = f.patch[si + 1];
-        canvas[di + 2] = f.patch[si + 2];
-        canvas[di + 3] = 255;
-      }
-    }
-    out.push({ pixels: canvas.slice(), delay: Math.max(60, f.delay || 125) });
-    if (f.disposalType === 2) {
-      for (let y = 0; y < h; y += 1) {
-        canvas.fill(0, ((top + y) * W + left) * 4, ((top + y) * W + left + w) * 4);
-      }
-    } else if (before) {
-      canvas.set(before);
-    }
-  }
-  return { W, H, out };
-}
 
 function voxelize(
   pixels: Uint8ClampedArray,
@@ -113,22 +74,80 @@ function voxelize(
     }
   }
 
-  let count = 0;
-  for (let k = 0; k < solid.length; k += 1) count += solid[k];
-  const cells = new Float32Array(count * 3);
+  // Inflate like a plush toy: a round cross-section, so a disc becomes a ball
+  // and thin parts (ears, legs, tails) stay slender. R is the widest radius.
+  let R = 1;
+  for (let k = 0; k < dist.length; k += 1) if (solid[k] && dist[k] > R) R = dist[k];
+  R = Math.min(R, Math.max(gw, gh) * 0.32);
+  const half = (d: number) => {
+    const t = Math.min(d, R);
+    return Math.max(0.5, Math.sqrt(Math.max(0, R * R - (R - t) * (R - t))) * 0.85);
+  };
+
+  // The back of a character is its body, not a mirrored face: interior
+  // pixels take the most common mid-tone colour around them (eyes, mouths
+  // and highlights drop out), edges keep their own colour as the seam.
+  const lum = (k: number) => 0.2126 * rgb[k * 3] + 0.7152 * rgb[k * 3 + 1] + 0.0722 * rgb[k * 3 + 2];
+  const back = new Float32Array(rgb);
+  const R2 = 3;
+  for (let j = 0; j < gh; j += 1) {
+    for (let i = 0; i < gw; i += 1) {
+      const k = j * gw + i;
+      if (!solid[k] || dist[k] < 1.9) continue;
+      const votes = new Map<number, { n: number; k: number }>();
+      for (let dj = -R2; dj <= R2; dj += 1) {
+        for (let di = -R2; di <= R2; di += 1) {
+          const ii = i + di;
+          const jj = j + dj;
+          if (ii < 0 || jj < 0 || ii >= gw || jj >= gh) continue;
+          const q = jj * gw + ii;
+          if (!solid[q] || dist[q] < 1.9) continue;
+          const L = lum(q);
+          if (L < 0.02 || L > 0.85) continue; // outlines, pupils, eye whites, shine
+          const key = (Math.round(rgb[q * 3] * 20) << 12) | (Math.round(rgb[q * 3 + 1] * 20) << 6) | Math.round(rgb[q * 3 + 2] * 20);
+          const v = votes.get(key);
+          if (v) v.n += 1;
+          else votes.set(key, { n: 1, k: q });
+        }
+      }
+      let best: { n: number; k: number } | null = null;
+      votes.forEach((v) => {
+        if (!best || v.n > best.n) best = v;
+      });
+      if (best) {
+        const src = (best as { k: number }).k;
+        back[k * 3] = rgb[src * 3];
+        back[k * 3 + 1] = rgb[src * 3 + 1];
+        back[k * 3 + 2] = rgb[src * 3 + 2];
+      }
+    }
+  }
+
+  let solidCount = 0;
+  for (let k = 0; k < solid.length; k += 1) solidCount += solid[k];
+  const count = solidCount * 2;
+  const cells = new Float32Array(count * 4);
   const colors = new Float32Array(count * 3);
   let n = 0;
+  const push = (x: number, y: number, depth: number, zc: number, src: Float32Array, k: number) => {
+    cells[n * 4] = x;
+    cells[n * 4 + 1] = y;
+    cells[n * 4 + 2] = depth;
+    cells[n * 4 + 3] = zc;
+    colors[n * 3] = src[k * 3];
+    colors[n * 3 + 1] = src[k * 3 + 1];
+    colors[n * 3 + 2] = src[k * 3 + 2];
+    n += 1;
+  };
   for (let j = 0; j < gh; j += 1) {
     for (let i = 0; i < gw; i += 1) {
       const k = j * gw + i;
       if (!solid[k]) continue;
-      cells[n * 3] = i - gw / 2 + 0.5;
-      cells[n * 3 + 1] = gh - j - 0.5; // feet on y = 0
-      cells[n * 3 + 2] = Math.min(9, 1 + Math.sqrt(dist[k] - 0.5) * 1.6);
-      colors[n * 3] = rgb[k * 3];
-      colors[n * 3 + 1] = rgb[k * 3 + 1];
-      colors[n * 3 + 2] = rgb[k * 3 + 2];
-      n += 1;
+      const h = half(dist[k]);
+      const x = i - gw / 2 + 0.5;
+      const y = gh - j - 0.5; // feet on y = 0
+      push(x, y, h, h / 2, rgb, k); // front half
+      push(x, y, h, -h / 2, back, k); // back half
     }
   }
   return { count, cells, colors };
@@ -138,7 +157,7 @@ export function loadVoxelClip(url: string): Promise<VoxelClip> {
   const hit = cache.get(url);
   if (hit) return hit;
   const job = (async () => {
-    const { W, H, out } = await decodeFrames(url);
+    const { W, H, out } = await decodeGif(url);
     const meta = spriteMetaFor(url);
     const unit = meta?.[2] ?? 1;
     const box: [number, number, number, number] = meta ? [meta[3], meta[4], meta[5], meta[6]] : [0, 0, W, H];

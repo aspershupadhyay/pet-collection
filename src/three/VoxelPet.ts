@@ -66,11 +66,11 @@ export class VoxelPet {
     const c = mesh.instanceColor!.array as Float32Array;
     for (let i = 0; i < f.count; i += 1) {
       const o = i * 16;
-      // scale(1, 1, depth) then translate(x, y, 0)
+      // scale(1, 1, depth) then translate(x, y, z)
       m[o] = 1; m[o + 1] = 0; m[o + 2] = 0; m[o + 3] = 0;
       m[o + 4] = 0; m[o + 5] = 1; m[o + 6] = 0; m[o + 7] = 0;
-      m[o + 8] = 0; m[o + 9] = 0; m[o + 10] = f.cells[i * 3 + 2]; m[o + 11] = 0;
-      m[o + 12] = f.cells[i * 3]; m[o + 13] = f.cells[i * 3 + 1]; m[o + 14] = 0; m[o + 15] = 1;
+      m[o + 8] = 0; m[o + 9] = 0; m[o + 10] = f.cells[i * 4 + 2]; m[o + 11] = 0;
+      m[o + 12] = f.cells[i * 4]; m[o + 13] = f.cells[i * 4 + 1]; m[o + 14] = f.cells[i * 4 + 3]; m[o + 15] = 1;
       c[i * 3] = f.colors[i * 3];
       c[i * 3 + 1] = f.colors[i * 3 + 1];
       c[i * 3 + 2] = f.colors[i * 3 + 2];

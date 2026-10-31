@@ -33,13 +33,13 @@ export const CURSORS: CursorSet[] = [
   {
     id: 'paw-print',
     name: 'Paw Print',
-    tagline: 'Socrates leaves a print on everything you click.',
+    tagline: 'Miso leaves a print on everything you click.',
     description: 'A warm ember pointer with a paw for links. Easy to find on light and dark pages.',
     author: 'Petcraft',
     glyph: 'paw',
     palette: palette('ember', 'bone'),
     tone: HOUSE.ember,
-    petId: 'void_cat',
+    petId: 'miso_cat',
   },
   {
     id: 'ferris-claw',

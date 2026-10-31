@@ -66,7 +66,7 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
 /* Three companions taking a slow walk under the title. */
 const STROLLERS = [
   { id: 'akita_inu', ms: 26000, delay: 0 },
-  { id: 'pixel_chicken', ms: 31000, delay: -12000 },
+  { id: 'miso_cat', ms: 31000, delay: -12000 },
   { id: 'kitsune_fox', ms: 23000, delay: -19000 },
 ];
 

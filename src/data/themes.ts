@@ -6,11 +6,11 @@ export const THEMES: TerminalTheme[] = [
   {
     id: 'void',
     name: 'Void',
-    tagline: 'Socrates at 2 a.m.: near-black with an amber glow.',
+    tagline: 'Miso at 2 a.m.: near-black with an amber glow.',
     description: 'A deep, warm dark theme. Amber prompts, soft violet keywords, nothing that shouts.',
     author: 'Petcraft',
     mood: 'dark',
-    petId: 'void_cat',
+    petId: 'miso_cat',
     colors: {
       background: '#14110f', foreground: '#e9dfd3', cursor: '#f0a24b', selection: '#3a2f27',
       ansi: ['#2a2420', '#e2654f', '#9ccf7a', '#f0a24b', '#7aa2e8', '#c38ce6', '#6cc9c0', '#d9cfc3',
@@ -104,7 +104,7 @@ export const THEMES: TerminalTheme[] = [
   {
     id: 'parchment',
     name: 'Parchment',
-    tagline: 'Master Oogway reads your logs by lamplight.',
+    tagline: 'Kame reads your logs by lamplight.',
     description: 'A warm paper light theme with ink-brown text and sage accents.',
     author: 'Petcraft',
     mood: 'light',

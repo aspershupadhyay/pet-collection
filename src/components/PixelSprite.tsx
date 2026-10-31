@@ -4,11 +4,11 @@ import { resolveSpritePath } from '../utils/sprites';
 import { getShowreel } from '../data/showreel';
 import { useInView } from '../hooks/useInView';
 import { spriteMetaFor } from '../data/meta';
+import { SpriteCanvas } from './SpriteCanvas';
 
 /* [width, height, unit, x0, y0, x1, y1] — see scripts/sprite-meta.mjs */
 type Meta = [number, number, number, number, number, number, number];
 
-const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 interface PixelSpriteProps {
   pet: PetDefinition;
@@ -135,14 +135,9 @@ export const PixelSprite: React.FC<PixelSpriteProps> = React.memo(
             <rect x={0} y={px / 2} width={shadowW} height={px} fill="currentColor" />
           </svg>
         )}
-        <img
-          src={inView ? src : BLANK}
-          alt=""
-          draggable={false}
-          decoding="async"
-          className="pixelated select-none"
-          style={imgStyle}
-        />
+        {inView && meta && (
+          <SpriteCanvas src={src} width={imgStyle.width as number} height={imgStyle.height as number} style={imgStyle} active={inView} />
+        )}
       </div>
     );
   }

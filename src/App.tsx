@@ -72,8 +72,8 @@ const COLOR_GROUPS: Record<string, string[]> = {
 };
 
 const DEFAULT_FOLDERS: PetFolder[] = [
-  { id: 'terminal-buddies', name: 'Terminal Buddies', color: '#0066fa', petIds: ['void_cat', 'kitsune_fox', 'rubber_duck', 'ferris_crab', 'theme:void'], createdAt: '2026-10-30' },
-  { id: 'mythic-squad', name: 'Mythic Squad', color: '#a78bfa', petIds: ['totoro_spirit', 'magical_unicorn', 'morph_shapeshifter', 'cursor:starlight'], createdAt: '2026-10-30' },
+  { id: 'terminal-buddies', name: 'Terminal Buddies', color: '#0066fa', petIds: ['miso_cat', 'beep_bot', 'rubber_duck', 'ferris_crab', 'theme:void'], createdAt: '2026-10-30' },
+  { id: 'mythic-squad', name: 'Mythic Squad', color: '#a78bfa', petIds: ['moku_spirit', 'ember_sprite', 'magical_unicorn', 'cursor:starlight'], createdAt: '2026-10-30' },
 ];
 
 const ALWAYS: SectionId[] = ['favourites', 'folders', 'info'];
@@ -123,7 +123,7 @@ export function App() {
       return false;
     }
   });
-  const [favourites, setFavourites] = useStored<string[]>(COLLECTION.id === 'petcraft' ? 'petcraft_favourites' : `${COLLECTION.id}_favourites`, COLLECTION.kinds.includes('character') ? ['void_cat', 'kitsune_fox', 'rubber_duck', 'ferris_crab'] : []);
+  const [favourites, setFavourites] = useStored<string[]>(COLLECTION.id === 'petcraft' ? 'petcraft_favourites' : `${COLLECTION.id}_favourites`, COLLECTION.kinds.includes('character') ? ['miso_cat', 'moku_spirit', 'beep_bot', 'glim_jelly'] : []);
   const [folders, setFolders] = useStored<PetFolder[]>(COLLECTION.id === 'petcraft' ? 'petcraft_folders' : `${COLLECTION.id}_folders`, COLLECTION.kinds.includes('character') ? DEFAULT_FOLDERS : []);
   const [wornCursorId, setWornCursorId] = useStored<string | null>('petcraft_cursor_set', null);
 
