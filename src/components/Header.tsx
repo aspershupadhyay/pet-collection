@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PetCategory } from '../types/pet';
+import { PetCategory, PetStyle } from '../types/pet';
 import type { CatalogItem, CursorSet } from '../types/item';
 import { PET_CATEGORIES } from '../data/pets';
 import { COLLECTION, BRAND } from '../collection';
@@ -10,7 +10,18 @@ import { BrandMark } from './PetcraftMark';
 import { usePwaInstall } from '../pwa/pwa';
 import { Download } from 'lucide-react';
 
+export type StyleFilter = 'all' | PetStyle;
+
+const STYLE_OPTIONS: { id: StyleFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'realistic', label: 'Realistic' },
+  { id: 'chibi', label: 'Chibi' },
+  { id: 'pixel', label: 'Pixel art' },
+];
+
 interface HeaderProps {
+  selectedStyle: StyleFilter;
+  onSelectStyle: (style: StyleFilter) => void;
   selectedCategory: PetCategory;
   onSelectCategory: (cat: PetCategory) => void;
   sortMode: SortMode;
@@ -62,6 +73,8 @@ const HAS_CHARACTERS = COLLECTION.kinds.includes('character');
 const HEADER_PICKS = COLLECTION.featured.filter((f) => f.key).slice(0, 3);
 
 export const Header: React.FC<HeaderProps> = ({
+  selectedStyle,
+  onSelectStyle,
   selectedCategory,
   onSelectCategory,
   sortMode,
@@ -137,8 +150,8 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const currentHero = COLLECTION.heroes[activeNav] ?? COLLECTION.heroes[COLLECTION.sections[0]] ?? { title: BRAND.tagline, subtitle: '' };
-  const visibleCategories = PET_CATEGORIES.slice(0, 4);
-  const overflowCategories = PET_CATEGORIES.slice(4);
+  // Art styles lead; species live in one dropdown next to them
+  const overflowCategories = PET_CATEGORIES;
   const activeSwatch = COLOR_SWATCHES.find((c) => c.id === selectedColorFilter) || COLOR_SWATCHES[0];
   const activeSortLabel = SORT_OPTIONS.find((o) => o.id === sortMode)?.label || 'Curated';
   const isInfo = activeNav === 'info';
@@ -520,21 +533,19 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex min-w-0 flex-1 items-center sm:max-w-[38rem]">
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
             <div role="group" aria-label="Category" className="relative flex w-max gap-1.5">
-              {visibleCategories.map((cat) => {
-                const isSelected = selectedCategory === cat;
+              {STYLE_OPTIONS.map((opt) => {
+                const isSelected = selectedStyle === opt.id;
                 return (
                   <button
-                    key={cat}
+                    key={opt.id}
                     type="button"
                     aria-pressed={isSelected}
-                    onClick={() => onSelectCategory(cat)}
+                    onClick={() => onSelectStyle(opt.id)}
                     className={`surface inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 font-medium max-sm:h-7 max-sm:px-3 max-sm:text-small whitespace-nowrap transition-[color] duration-150 ${
-                      isSelected
-                        ? 'surface-primary text-white'
-                        : 'surface-outline text-ink-2 hover:text-ink'
+                      isSelected ? 'surface-primary text-white' : 'surface-outline text-ink-2 hover:text-ink'
                     }`}
                   >
-                    {cat}
+                    {opt.label}
                   </button>
                 );
               })}
@@ -549,21 +560,19 @@ export const Header: React.FC<HeaderProps> = ({
                   aria-expanded={moreCatsOpen}
                   onClick={() => setMoreCatsOpen((prev) => !prev)}
                   className={`surface inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 font-medium max-sm:h-7 max-sm:px-3 max-sm:text-small whitespace-nowrap transition-[color] duration-150 ${
-                    overflowCategories.includes(selectedCategory)
+                    selectedCategory !== 'All'
                       ? 'surface-primary text-white'
                       : 'surface-outline text-ink-2 hover:text-ink'
                   }`}
                 >
-                  {overflowCategories.includes(selectedCategory)
-                    ? selectedCategory
-                    : `+${overflowCategories.length} more`}
+                  {selectedCategory === 'All' ? 'Species' : selectedCategory}
                   <svg className="size-4 shrink-0 opacity-70" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="4,6 8,10 12,6" />
                   </svg>
                 </button>
 
                 {moreCatsOpen && (
-                  <div className="animate-popup-in absolute top-full left-0 z-50 mt-2 w-44 rounded-tray layer-float p-1">
+                  <div className="animate-popup-in absolute top-full left-0 z-50 mt-2 w-48 rounded-tray layer-float p-1">
                     {overflowCategories.map((cat) => (
                       <button
                         key={cat}
@@ -578,7 +587,7 @@ export const Header: React.FC<HeaderProps> = ({
                             : 'text-ink-2 hover:bg-wash hover:text-ink'
                         }`}
                       >
-                        <span>{cat}</span>
+                        <span>{cat === 'All' ? 'All species' : cat}</span>
                         {selectedCategory === cat && <span className="size-1.5 rounded-full bg-brand" />}
                       </button>
                     ))}

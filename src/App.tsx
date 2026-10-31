@@ -4,7 +4,7 @@ import { PETS } from './data/pets';
 import { PetAction, PetCategory, PetDefinition, PetFolder } from './types/pet';
 import { CatalogItem, itemKey, KIND_LABEL } from './types/item';
 import { Sidebar, SECTION_LABEL } from './components/Sidebar';
-import { Header, SortMode } from './components/Header';
+import { Header, SortMode, StyleFilter } from './components/Header';
 import { PetCard } from './components/PetCard';
 import { ItemCard, ITEM_RATIO } from './components/items/ItemCard';
 import { ItemIcon } from './components/items/Previews';
@@ -109,6 +109,7 @@ export function App() {
   const [section, setSection] = useState<SectionId>(() => validSection(parseRoute().section ?? (parseRoute().detail?.kind === 'work' ? 'showcase' : undefined)));
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<PetCategory>('All');
+  const [selectedStyle, setSelectedStyle] = useState<StyleFilter>('all');
   const [selectedColorFilter, setSelectedColorFilter] = useState('all');
   const [sortMode, setSortMode] = useState<SortMode>('curated');
   const [sponsorFocus, setSponsorFocus] = useState(false);
@@ -354,6 +355,7 @@ export function App() {
   const filteredPets = useMemo(() => {
     if (section !== 'characters') return allPets;
     const list = allPets.filter((pet) => {
+      if (selectedStyle !== 'all' && (pet.style ?? 'pixel') !== selectedStyle) return false;
       if (selectedCategory !== 'All' && pet.category !== selectedCategory) return false;
       if (selectedColorFilter !== 'all' && !COLOR_GROUPS[selectedColorFilter]?.includes(pet.primaryColor.toLowerCase())) return false;
       return true;
@@ -361,7 +363,7 @@ export function App() {
     if (sortMode === 'rarity') list.sort((a, b) => RARITY_RANK[a.rarity] - RARITY_RANK[b.rarity]);
     if (sortMode === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [allPets, section, selectedCategory, selectedColorFilter, sortMode]);
+  }, [allPets, section, selectedStyle, selectedCategory, selectedColorFilter, sortMode]);
 
   const kindItems = useMemo(
     () => ({
@@ -453,6 +455,7 @@ export function App() {
         type="button"
         onClick={() => {
           setSelectedCategory('All');
+          setSelectedStyle('all');
           setSelectedColorFilter('all');
           if (section !== 'characters') selectSection(HOME);
         }}
@@ -491,6 +494,8 @@ export function App() {
           <main id="main-content" tabIndex={-1} className="relative flex-1 outline-none">
             <div className="px-[16px] pb-16">
               <Header
+                selectedStyle={selectedStyle}
+                onSelectStyle={setSelectedStyle}
                 selectedCategory={selectedCategory}
                 onSelectCategory={setSelectedCategory}
                 sortMode={sortMode}
@@ -635,7 +640,7 @@ export function App() {
                   <CanvasView pets={wallPets} onSelectPet={(p) => openPet(p)} />
                 ) : (
                   <Masonry
-                    key={`${section}-${activeFolderId}-${selectedCategory}-${selectedColorFilter}-${sortMode}`}
+                    key={`${section}-${activeFolderId}-${selectedStyle}-${selectedCategory}-${selectedColorFilter}-${sortMode}`}
                     items={wall}
                     getKey={itemKey}
                     getRatio={itemRatio}

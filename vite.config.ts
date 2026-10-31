@@ -95,9 +95,11 @@ export default defineConfig(({ mode }) => {
         runtimeCaching: [
           {
             urlPattern: /\/(sprites|icons)\//i,
-            handler: 'CacheFirst',
+            // Serve from cache instantly, refresh in the background, so
+            // redrawn or replaced sprites show up on the next visit
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'petcraft-sprites-v1',
+              cacheName: 'petcraft-sprites-v2',
               expiration: {
                 maxEntries: 800,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days

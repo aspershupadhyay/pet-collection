@@ -19,6 +19,9 @@ export type PetCategory =
   | 'Aquatic & Nature'
   | 'Avian';
 
+/** How a character is drawn. */
+export type PetStyle = 'realistic' | 'chibi' | 'pixel';
+
 export type PetHabitat = 'forest' | 'castle' | 'beach' | 'winter' | 'autumn' | 'library' | 'none';
 
 export interface PetStats {
@@ -56,6 +59,8 @@ export interface PetDefinition {
   tagline: string;
   description: string;
   category: Exclude<PetCategory, 'All'>;
+  /** Art style; classic pixel sprites when omitted. */
+  style?: PetStyle;
   rarity: 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic';
   primaryColor: string;
   secondaryColor: string;

@@ -51,6 +51,11 @@ const COAT_HEX: Record<string, string> = {
   orange: '#e7883a', lightbrown: '#b8865a', yellow: '#f4c430', green: '#4caf50', blue: '#3b82f6', purple: '#8b5cf6',
   pink: '#f19ac2', piedpearl: '#e8dcc0', whiteface: '#d9d9d9', magical: '#c9a7ff', warrior: '#8a6d4a',
   paint_beige: '#d8bf9a', socks_black: '#3a3a40', gray_jimothy: '#7d7d86',
+  // Petcraft originals
+  ginger: '#e0893f', smoke: '#7c8290', spotted: '#cf9852', snow: '#f0eeea', cream: '#f2a65a', charcoal: '#5c5f73',
+  moss: '#7d9a6a', dusk: '#7b74a8', mint: '#cfe9df', retro: '#e9dcc2', barn: '#b9824f', snowy: '#eef1f7',
+  blaze: '#ff6a2b', azure: '#3d7bff', cloud: '#fbfaff', storm: '#b9bfd6', lagoon: '#7fd6ef', berry: '#f29bd0',
+  golden: '#f0b46a', panda: '#2a2a33',
 };
 
 const has3D = (() => {
@@ -200,6 +205,9 @@ export const PetDetail: React.FC<PetDetailProps> = ({
     >
       <p className="text-[14px] leading-[1.6] text-ink-2">{pet.tagline}</p>
       <div className="mt-3 flex flex-wrap gap-1.5">
+        <span className="rounded-full bg-well px-2.5 py-1 text-[12px] text-ink-2">
+          {pet.style === 'realistic' ? 'Realistic' : pet.style === 'chibi' ? 'Chibi' : 'Pixel art'}
+        </span>
         <span className="rounded-full bg-well px-2.5 py-1 text-[12px] text-ink-2">{pet.category}</span>
         <span className="rounded-full bg-well px-2.5 py-1 text-[12px]" style={{ color: RARITY_COLOR[pet.rarity] }}>
           {pet.rarity}

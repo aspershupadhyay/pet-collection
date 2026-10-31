@@ -5,6 +5,8 @@ import path from 'node:path';
 import gifenc from 'gifenc';
 import { Grid, render, png, W, H } from './engine.mjs';
 import { CAST, ACTIONS } from './cast.mjs';
+import { REAL_CAST, realFrames, REAL_ACTIONS } from './realcast.mjs';
+import { RW, RH } from './realistic.mjs';
 
 const { GIFEncoder } = gifenc;
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -26,12 +28,12 @@ function frames(char, variant, action) {
   });
 }
 
-function writeGif(file, list) {
+function writeGif(file, list, w = W, h = H) {
   const colours = new Map([['t', 0]]);
   const palette = [[0, 0, 0]];
   const indexed = list.map((rgba) => {
-    const idx = new Uint8Array(W * H);
-    for (let i = 0; i < W * H; i++) {
+    const idx = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) {
       if (!rgba[i * 4 + 3]) continue;
       const key = `${rgba[i * 4]},${rgba[i * 4 + 1]},${rgba[i * 4 + 2]}`;
       let k = colours.get(key);
@@ -48,10 +50,18 @@ function writeGif(file, list) {
   while (palette.length & (palette.length - 1) || palette.length < 4) palette.push([0, 0, 0]);
   const enc = GIFEncoder();
   indexed.forEach((idx, i) =>
-    enc.writeFrame(idx, W, H, { palette: i === 0 ? palette : undefined, transparent: true, transparentIndex: 0, delay: 125, repeat: 0, dispose: 2 })
+    enc.writeFrame(idx, w, h, { palette: i === 0 ? palette : undefined, transparent: true, transparentIndex: 0, delay: 125, repeat: 0, dispose: 2 })
   );
   enc.finish();
   fs.writeFileSync(file, enc.bytes());
+}
+
+for (const char of REAL_CAST) {
+  const dir = path.join(root, 'public/sprites', char.folder);
+  fs.mkdirSync(dir, { recursive: true });
+  for (const [variant, spec] of Object.entries(char.variants))
+    for (const action of Object.keys(REAL_ACTIONS)) writeGif(path.join(dir, `${variant}_${action}_8fps.gif`), realFrames(spec, action), RW, RH);
+  console.log('drew', char.id, Object.keys(char.variants).join(', '));
 }
 
 const preview = process.argv.includes('--preview') ? process.argv[process.argv.indexOf('--preview') + 1] : null;

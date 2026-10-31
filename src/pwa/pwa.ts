@@ -12,18 +12,33 @@ export function setupPwa(): void {
   if (!('serviceWorker' in navigator)) return;
   registered = true;
 
+  // When a new version takes over, reload once so nobody keeps running an
+  // old copy of the app (or seeing characters that have been removed).
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
+
+  // Caches from older versions of the site
+  caches?.keys().then((keys) => keys.filter((k) => k === 'petcraft-sprites-v1').forEach((k) => caches.delete(k)));
+
   registerSW({
     immediate: true,
     onRegisteredSW(swUrl) {
-      // Re-check for updates periodically while the app stays open
-      setInterval(async () => {
+      const check = async () => {
         try {
           const reg = await navigator.serviceWorker.getRegistration(swUrl);
           await reg?.update();
         } catch {
           // offline or SW unavailable — ignore
         }
-      }, 60 * 60 * 1000); // hourly
+      };
+      // Check when the tab comes back and every 15 minutes while open
+      document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && check());
+      setInterval(check, 15 * 60 * 1000);
     },
   });
 }

@@ -34,6 +34,8 @@ const CANDIDATES: { action: PetAction; caption: (pet: PetDefinition) => string }
 /* Each companion's own take on every moment. Anything missing falls back to
    the generic caption above. Keep lines short: they share a card with the pet. */
 const PET_LINES: Record<string, Partial<Record<PetAction, string>>> = {
+  cha_cat: { idle: 'Sits like he owns the desk', walk: 'Prowls the status bar', code: 'Bats at your cursor', play: 'Toys with a ball', celebrate: 'Pounces on a merge', sleep: 'Loafs through the build', special: 'The full-desk stretch', dance: 'Gallops after a bug' },
+  chi_cat: { idle: 'Watches every keystroke', walk: 'Stalks along the tabs', code: 'Swipes at a typo', play: 'Hunts a rolling ball', celebrate: 'Leaps on a green build', sleep: 'Naps in a tidy loaf', special: 'Stretch, then a yawn', dance: 'Sprints for no reason' },
   miso_cat: { idle: 'Sits on your keyboard', walk: 'Pads along the status bar', code: 'Swats the blinking cursor', play: 'Bats the ball around', celebrate: 'Pounces on a merge', sleep: 'Loafs through the build', special: 'One enormous yawn', dance: 'Zooms for no reason' },
   moku_spirit: { idle: 'Breathes in the forest air', walk: 'Shuffles between tabs', code: 'Waves a twig at the bug', play: 'Rolls a seed about', celebrate: 'Hops over the canopy', sleep: 'Naps in the moss', special: 'Blooms on a green build', dance: 'Rustles happily' },
   beep_bot: { idle: 'Blinks its antenna', walk: 'Rolls over to help', code: 'Points at line 42', play: 'Plays catch with a byte', celebrate: 'Hops on a passing test', sleep: 'Screen dims to standby', special: 'Shows a compile heart', dance: 'Spins its wheels' },

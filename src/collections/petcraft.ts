@@ -21,7 +21,7 @@ const config: CollectionConfig = {
     },
     characters: {
       title: 'Every character, always moving.',
-      subtitle: 'Each card loops through what that character does. Open one to turn it in 3D and copy it into your tool.',
+      subtitle: 'Realistic, chibi and classic pixel art, every one always moving. Open a character to turn it in 3D and copy it into your tool.',
     },
     cursors: {
       title: 'Cursors with a little personality.',
@@ -43,7 +43,9 @@ const config: CollectionConfig = {
     folders: { title: 'Your folders.', subtitle: 'Group characters, cursors and themes by project or mood.' },
   },
   featured: [
-    { key: 'miso_cat', title: 'Miso', label: 'New original', description: 'A round little tabby who yawns through your builds. Drawn by Petcraft.' },
+    { key: 'cha_cat', title: 'Cha', label: 'New · Realistic', description: 'A big ginger tom with white socks and a stretch that takes the whole desk.' },
+    { key: 'chi_cat', title: 'Chi', label: 'New · Realistic', description: 'A slim brown spotted cat who stalks your cursor like it owes her money.' },
+    { key: 'miso_cat', title: 'Miso', label: 'New · Chibi', description: 'A round little tabby who yawns through your builds. Drawn by Petcraft.' },
     { key: 'moku_spirit', title: 'Moku', label: 'New original', description: 'A mossy forest spirit that blooms when your build goes green.' },
     { key: 'theme:rustacean', title: 'Rustacean', label: 'New theme', description: 'Ferris red on ocean slate, with configs for six terminals.' },
     { key: 'cursor:quack', title: 'Quack', label: 'New cursor set', description: 'A rubber-duck cursor that points at the bug for you.' },
