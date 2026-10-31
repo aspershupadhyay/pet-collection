@@ -2,17 +2,36 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { PETS } from './data/pets';
 import { PetAction, PetCategory, PetDefinition, PetFolder } from './types/pet';
 import { Sidebar, NavSection } from './components/Sidebar';
-import { Header } from './components/Header';
+import { Header, SortMode } from './components/Header';
 import { PetCard } from './components/PetCard';
 import { ListView } from './components/ListView';
 import { CanvasView } from './components/CanvasView';
 import { PetModal } from './components/PetModal';
 import { StudioView } from './components/StudioView';
 import { CommandPalette } from './components/CommandPalette';
-import { InfoModal, SubmitModal } from './components/InfoSubmitModals';
+import { SubmitModal } from './components/InfoSubmitModals';
+import { InfoPage } from './components/InfoPage';
+import { Masonry } from './components/Masonry';
+import { petHash } from './data/showreel';
 import { Toast, ToastItem } from './components/Toast';
 import { generateToolSnippets } from './utils/toolExport';
 import { Folder as FolderIcon, Plus, Trash2 } from 'lucide-react';
+
+/* Tile shapes for the masonry wall (stage width ÷ height). Each pet keeps the
+   same shape everywhere, so the wall's rhythm is stable between visits. */
+const TILE_RATIOS = [0.8, 0.92, 1.04, 1.16, 1.3];
+const tileRatio = (pet: PetDefinition) => TILE_RATIOS[petHash(pet.id) % TILE_RATIOS.length];
+
+const RARITY_RANK: Record<PetDefinition['rarity'], number> = {
+  Mythic: 0,
+  Legendary: 1,
+  Epic: 2,
+  Rare: 3,
+  Common: 4,
+};
+
+// Collection numbers follow the catalogue order
+const SERIALS = new Map(PETS.map((p, i) => [p.id, i + 1]));
 
 const DEFAULT_FOLDERS: PetFolder[] = [
   {
@@ -47,7 +66,8 @@ export function App() {
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<PetCategory>('All');
   const [selectedColorFilter, setSelectedColorFilter] = useState<string>('all');
-  const [globalAction, setGlobalAction] = useState<PetAction | 'auto'>('auto');
+  const [sortMode, setSortMode] = useState<SortMode>('curated');
+  const [sponsorFocus, setSponsorFocus] = useState(false);
   const [viewMode, setViewMode] = useState<'tile' | 'list' | 'canvas'>('tile');
   const [renderMode, setRenderMode] = useState<'pixel' | 'ascii'>('pixel');
 
@@ -87,7 +107,6 @@ export function App() {
   } | null>(null);
   const [studioOpen, setStudioOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [infoOpen, setInfoOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -236,6 +255,7 @@ export function App() {
 
   const handleSelectNav = useCallback((nav: NavSection) => {
     setActiveNav(nav);
+    setSponsorFocus(false);
     setActiveFolderId(null);
     setMobileMenuOpen(false);
   }, []);
@@ -293,13 +313,26 @@ export function App() {
     });
   }, [allPets, activeNav, activeFolderId, folders, favourites, selectedCategory, selectedColorFilter]);
 
+  const sortedPets = useMemo(() => {
+    if (sortMode === 'curated') return filteredPets;
+    const list = [...filteredPets];
+    if (sortMode === 'rarity') list.sort((a, b) => RARITY_RANK[a.rarity] - RARITY_RANK[b.rarity]);
+    if (sortMode === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }, [filteredPets, sortMode]);
+
+  const openSponsor = useCallback(() => {
+    setActiveNav('info');
+    setActiveFolderId(null);
+    setMobileMenuOpen(false);
+    setSponsorFocus(true);
+  }, []);
+
   const activeFolder = useMemo(
     () => folders.find((f) => f.id === activeFolderId) || null,
     [folders, activeFolderId]
   );
 
-  // Determine whether cards use 'finds' or 'catalogue' overlay style
-  const cardStyle = activeNav === 'finds' || activeNav === 'favourites' || activeNav === 'folders' ? 'finds' : 'catalogue';
 
   return (
     <div className="hatch min-h-dvh">
@@ -316,7 +349,7 @@ export function App() {
           activeNav={activeNav}
           onSelectNav={handleSelectNav}
           favouritesCount={favourites.length}
-          onOpenSubmit={() => setSubmitOpen(true)}
+          onOpenSponsor={openSponsor}
           onSelectPet={(pet) => setActivePetModal({ pet, action: 'idle' })}
           folders={folders}
           activeFolderId={activeFolderId}
@@ -332,8 +365,8 @@ export function App() {
               <Header
                 selectedCategory={selectedCategory}
                 onSelectCategory={setSelectedCategory}
-                globalAction={globalAction}
-                onSelectGlobalAction={setGlobalAction}
+                sortMode={sortMode}
+                onChangeSort={setSortMode}
                 viewMode={viewMode}
                 onChangeViewMode={setViewMode}
                 renderMode={renderMode}
@@ -342,7 +375,7 @@ export function App() {
                 onSelectColorFilter={setSelectedColorFilter}
                 onOpenSearch={() => setSearchOpen(true)}
                 onOpenStudio={() => setStudioOpen(true)}
-                onOpenInfo={() => setInfoOpen(true)}
+                onOpenInfo={() => handleSelectNav('info')}
                 onOpenSubmit={() => setSubmitOpen(true)}
                 onSelectPet={(pet) => setActivePetModal({ pet, action: 'idle' })}
                 darkMode={darkMode}
@@ -479,14 +512,16 @@ export function App() {
                 </div>
               )}
 
-              {/* Main View Switcher: Tile vs List vs Canvas */}
-              {filteredPets.length === 0 ? (
+              {/* Main View Switcher: Info page, then Tile vs List vs Canvas */}
+              {activeNav === 'info' ? (
+                <InfoPage onOpenSubmit={() => setSubmitOpen(true)} focusSponsor={sponsorFocus} />
+              ) : filteredPets.length === 0 ? (
                 <div className="my-12 flex flex-col items-center justify-center rounded-sheet border border-dashed border-line-strong py-20 text-center">
                   <p className="font-display text-title font-medium text-ink">
                     No companions match the current filter
                   </p>
                   <p className="mt-1 max-w-sm text-small text-ink-3">
-                    Try resetting your category or colour filter, or browse all 20 interactive companions.
+                    Try resetting your category or colour filter, or browse all {allPets.length} companions.
                   </p>
                   <button
                     type="button"
@@ -503,31 +538,31 @@ export function App() {
                   </button>
                 </div>
               ) : viewMode === 'tile' ? (
-                /* Masonry tile wall: CSS columns flow, card heights vary per pet */
-                <div className="columns-1 gap-3 sm:columns-2 lg:columns-3 2xl:columns-4">
-                  {filteredPets.map((pet) => (
+                <Masonry
+                  key={`${activeNav}-${activeFolderId}-${selectedCategory}-${selectedColorFilter}-${sortMode}`}
+                  items={sortedPets}
+                  getKey={(p) => p.id}
+                  getRatio={tileRatio}
+                  renderItem={(pet, { index, width, ratio }) => (
                     <PetCard
-                      key={pet.id}
                       pet={pet}
-                      globalAction={globalAction}
+                      serial={SERIALS.get(pet.id) ?? allPets.indexOf(pet) + 1}
+                      index={index}
+                      width={width}
+                      ratio={ratio}
                       renderMode={renderMode}
-                      onSelectPet={(p, act, variant) =>
-                        setActivePetModal({ pet: p, action: act, variant })
-                      }
-                      onQuickCopy={handleQuickCopy}
+                      onSelectPet={(p, act, variant) => setActivePetModal({ pet: p, action: act, variant })}
                       isFavourite={favourites.includes(pet.id)}
                       onToggleFavourite={toggleFavourite}
-                      muted={muted}
-                      cardStyle={cardStyle}
                       folders={folders}
                       onTogglePetInFolder={handleTogglePetInFolder}
                     />
-                  ))}
-                </div>
+                  )}
+                />
               ) : viewMode === 'list' ? (
                 <ListView
-                  pets={filteredPets}
-                  globalAction={globalAction}
+                  pets={sortedPets}
+                  globalAction="auto"
                   renderMode={renderMode}
                   onSelectPet={(p) => setActivePetModal({ pet: p, action: 'idle' })}
                   onQuickCopy={handleQuickCopy}
@@ -536,8 +571,8 @@ export function App() {
                 />
               ) : (
                 <CanvasView
-                  pets={filteredPets}
-                  globalAction={globalAction}
+                  pets={sortedPets}
+                  globalAction="auto"
                   renderMode={renderMode}
                   onSelectPet={(p, act) => setActivePetModal({ pet: p, action: act })}
                   onQuickCopy={handleQuickCopy}
@@ -601,7 +636,7 @@ export function App() {
               Browse Collections
             </div>
             <div className="grid grid-cols-2 gap-1.5">
-              {(['finds', 'inspiration', 'resources', 'tools', 'portfolios', 'favourites', 'folders'] as NavSection[]).map(
+              {(['finds', 'inspiration', 'resources', 'tools', 'portfolios', 'favourites', 'folders', 'info'] as NavSection[]).map(
                 (nav) => (
                   <button
                     key={nav}
@@ -657,15 +692,6 @@ export function App() {
             setActivePetModal({ pet, action: 'idle' });
           }}
           onCopySuccess={(msg) => addToast(msg, 'Copied to clipboard')}
-        />
-      )}
-
-      {/* Info Modal */}
-      {infoOpen && (
-        <InfoModal
-          onClose={() => setInfoOpen(false)}
-          onOpenStudio={() => setStudioOpen(true)}
-          petCount={allPets.length}
         />
       )}
 

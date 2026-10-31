@@ -13,7 +13,7 @@ export default defineConfig({
         name: 'PetCraft — Interactive AI Companions',
         short_name: 'PetCraft',
         description:
-          'A curated collection of 20 interactive AI companion pets with 11 realistic actions for Claude Code, Cursor, CLI tools, and your terminal.',
+          'A curated collection of 23 interactive AI companion pets with 11 realistic actions for Claude Code, Cursor, CLI tools, and your terminal.',
         lang: 'en',
         id: '/?source=pwa',
         start_url: '/',

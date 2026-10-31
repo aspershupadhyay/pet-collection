@@ -1,3 +1,11 @@
+/* Theme colours are CSS variables, which Tailwind can't split into channels,
+   so `bg-ink/10`-style opacity modifiers used to generate nothing. Mixing with
+   transparent gives every token working alpha variants. */
+const token = (name) => ({ opacityValue }) =>
+  opacityValue === undefined || opacityValue === '1'
+    ? `var(${name})`
+    : `color-mix(in srgb, var(${name}) calc(${opacityValue} * 100%), transparent)`;
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -8,31 +16,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: 'var(--canvas)',
-        page: 'var(--page)',
-        well: 'var(--well)',
+        canvas: token('--canvas'),
+        page: token('--page'),
+        well: token('--well'),
         ink: {
-          DEFAULT: 'var(--ink)',
-          2: 'var(--ink-2)',
-          3: 'var(--ink-3)',
+          DEFAULT: token('--ink'),
+          2: token('--ink-2'),
+          3: token('--ink-3'),
         },
         line: {
-          DEFAULT: 'var(--line)',
-          strong: 'var(--line-strong)',
+          DEFAULT: token('--line'),
+          strong: token('--line-strong'),
         },
-        raised: 'var(--raised)',
+        raised: token('--raised'),
         wash: {
-          DEFAULT: 'var(--wash)',
-          hover: 'var(--wash-hover)',
+          DEFAULT: token('--wash'),
+          hover: token('--wash-hover'),
         },
         brand: {
-          DEFAULT: 'var(--brand)',
-          glow: 'var(--brand-glow)',
-          subtle: 'var(--brand-subtle)',
+          DEFAULT: token('--brand'),
+          glow: token('--brand-glow'),
+          subtle: token('--brand-subtle'),
         },
         surface: {
-          base: 'var(--surface-base)',
-          lit: 'var(--surface-lit)',
+          base: token('--surface-base'),
+          lit: token('--surface-lit'),
         }
       },
       fontFamily: {
@@ -54,13 +62,13 @@ export default {
       boxShadow: {
         'tile-hover': '0 16px 36px -10px rgba(0,0,0,0.35), 0 0 0 1px var(--line-strong)',
         'glow-brand': '0 0 24px -4px var(--brand-glow)',
-        float: 'var(--shadow-float)',
-        stage: 'var(--shadow-stage)',
+        float: token('--shadow-float'),
+        stage: token('--shadow-stage'),
       },
       borderRadius: {
-        tile: 'var(--radius-tile)',
-        sheet: 'var(--radius-sheet)',
-        tray: 'var(--radius-tray)',
+        tile: token('--radius-tile'),
+        sheet: token('--radius-sheet'),
+        tray: token('--radius-tray'),
         card: '14px',
         pill: '9999px',
       },

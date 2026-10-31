@@ -706,3 +706,137 @@
     animation: none;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Collectible pet cards — stage material, loop progress, foil
+   ───────────────────────────────────────────────────────────── */
+.pc-card {
+  animation: pc-enter 0.6s var(--ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 12) * 45ms);
+}
+@keyframes pc-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.pc-stage {
+  --tint: #888;
+  background:
+    radial-gradient(110% 62% at 50% 100%, color-mix(in srgb, var(--tint) 20%, transparent), transparent 62%),
+    radial-gradient(90% 55% at 50% -5%, color-mix(in srgb, var(--ink) 5%, transparent), transparent 70%),
+    var(--well);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: box-shadow 0.25s var(--ease-out), transform 0.35s var(--ease-out);
+}
+.pc-card:hover .pc-stage {
+  box-shadow: inset 0 0 0 1px var(--line-strong), 0 22px 44px -22px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+/* Receding pixel floor the companion stands on */
+.pc-floor {
+  position: absolute;
+  inset: auto -25% 0 -25%;
+  height: 38%;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+  transform: perspective(260px) rotateX(58deg);
+  transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 85%);
+  mask-image: linear-gradient(to top, #000 10%, transparent 85%);
+  pointer-events: none;
+}
+
+/* Pointer-follow light — written via CSS vars, no React re-render */
+.pc-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 35%), rgba(255, 255, 255, 0.5), transparent 62%);
+  mix-blend-mode: soft-light;
+  transition: opacity 0.3s var(--ease-out);
+}
+.dark .pc-light {
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 35%), rgba(255, 255, 255, 0.09), transparent 62%);
+  mix-blend-mode: normal;
+}
+.pc-card:hover .pc-light { opacity: 1; }
+
+/* Holo foil — Legendary & Mythic only */
+.pc-foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  /* A narrow glint that slides across as the pointer moves */
+  background: linear-gradient(115deg,
+    transparent 40%,
+    var(--foil-a) 46%,
+    var(--foil-b) 50%,
+    var(--foil-c) 54%,
+    transparent 60%);
+  background-size: 300% 300%;
+  background-position: var(--fx, 50%) var(--fy, 50%);
+  mix-blend-mode: soft-light;
+  transition: opacity 0.35s var(--ease-out);
+}
+.pc-card:hover .pc-foil { opacity: 0.55; }
+.pc-foil-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(140deg, var(--foil-a), transparent 30%, transparent 70%, var(--foil-c));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0.55;
+  transition: opacity 0.3s var(--ease-out);
+}
+.pc-card:hover .pc-foil-ring { opacity: 1; }
+.pc-tier-legendary { --foil-a: #ffd27a; --foil-b: #fff4d6; --foil-c: #d18b1f; }
+.pc-tier-mythic { --foil-a: #b79bff; --foil-b: #7fe3ff; --foil-c: #ff9bd8; }
+
+/* Story-style loop progress */
+.pc-seg-fill {
+  animation: pc-seg var(--seg-ms, 3400ms) linear both;
+}
+@keyframes pc-seg {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.pc-caption {
+  animation: pc-caption 0.45s var(--ease-out) both;
+}
+@keyframes pc-caption {
+  from { opacity: 0; transform: translateY(5px); filter: blur(2px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* FAQ accordion + info page */
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.32s var(--ease-out);
+}
+.faq-panel[data-open="true"] { grid-template-rows: 1fr; }
+
+@keyframes stroll {
+  from { transform: translateX(-80px); }
+  to { transform: translateX(calc(var(--track-w, 640px) + 20px)); }
+}
+.stroll {
+  animation: stroll var(--stroll-ms, 18s) linear infinite;
+  animation-delay: var(--stroll-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-card, .pc-caption, .stroll { animation: none; }
+  .pc-seg-fill { animation: none; transform: scaleX(1); }
+  .pc-card:hover .pc-stage { transform: none; }
+}

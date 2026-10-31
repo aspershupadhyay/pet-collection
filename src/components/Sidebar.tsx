@@ -4,13 +4,13 @@ import { PETS } from '../data/pets';
 import { Folder as FolderIcon, Trash2 } from 'lucide-react';
 import { PetcraftLogo } from './PetcraftMark';
 
-export type NavSection = 'finds' | 'inspiration' | 'resources' | 'tools' | 'portfolios' | 'favourites' | 'folders';
+export type NavSection = 'finds' | 'inspiration' | 'resources' | 'tools' | 'portfolios' | 'favourites' | 'folders' | 'info';
 
 interface SidebarProps {
   activeNav: NavSection;
   onSelectNav: (nav: NavSection) => void;
   favouritesCount: number;
-  onOpenSubmit: () => void;
+  onOpenSponsor: () => void;
   onSelectPet: (pet: PetDefinition) => void;
   folders: PetFolder[];
   activeFolderId: string | null;
@@ -51,14 +51,14 @@ const FEATURED_ITEMS = [
     badgeColor: '#EAB308',
   },
   {
-    petId: 'kitsune_fox',
-    name: 'Petcraft Studio',
+    petId: '',
+    name: 'Your product here',
     sublabel: 'Open slot',
-    description: 'Export any companion to Claude Code /buddy, VS Code Pets, or standalone HTML.',
-    cta: 'Submit a companion',
+    description: 'Put your product in front of people who build with AI tools every day.',
+    cta: 'Become a sponsor',
     isPrimary: false,
-    iconUrl: '/sprites/fox/red_idle_8fps.gif',
-    badgeColor: '#EA580C',
+    iconUrl: '',
+    badgeColor: '',
   },
 ];
 
@@ -67,7 +67,7 @@ const FOLDER_COLORS = ['#0066fa', '#00bbff', '#a78bfa', '#f59e0b', '#10b981', '#
 export const Sidebar: React.FC<SidebarProps> = ({
   activeNav,
   onSelectNav,
-  onOpenSubmit,
+  onOpenSponsor,
   onSelectPet,
   folders,
   activeFolderId,
@@ -97,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleFeaturedClick = (item: (typeof FEATURED_ITEMS)[number]) => {
     if (!item.isPrimary) {
-      onOpenSubmit();
+      onOpenSponsor();
       return;
     }
     const found = PETS.find((p) => p.id === item.petId);
@@ -182,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Scrollable Navigation & Featured Carousel */}
       <div className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto px-2.5 pt-4 pb-3">
         <p className="px-2.5 text-body leading-[1.5] text-ink-2">
-          A curated collection of interface craft, interactive AI companions, pixel sprites, and resources for builders.
+          A hand-picked collection of pixel companions that live next to your code.
         </p>
 
         <hr className="mx-2.5 my-5 border-t border-dashed border-line-strong" />
@@ -378,13 +378,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <span
                           className="grid size-7 shrink-0 place-items-center rounded-lg bg-page shadow-[inset_0_0_0_1px_var(--line)] overflow-hidden"
                         >
-                          <img
-                            src={item.iconUrl}
-                            alt=""
-                            width={24}
-                            height={24}
-                            className="size-6 object-contain pixelated"
-                          />
+                          {item.iconUrl ? (
+                            <img
+                              src={item.iconUrl}
+                              alt=""
+                              width={24}
+                              height={24}
+                              className="size-6 object-contain pixelated"
+                            />
+                          ) : (
+                            <span className="grid size-full place-items-center rounded-lg border border-dashed border-line-strong text-ink-3">+</span>
+                          )}
                         </span>
                         <div className="flex min-w-0 flex-col">
                           <span className="truncate text-body leading-tight font-medium text-ink">

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PetAction, PetCategory, PetDefinition } from '../types/pet';
-import { ACTIONS, PET_CATEGORIES, PETS } from '../data/pets';
+import { PetCategory, PetDefinition } from '../types/pet';
+import { PET_CATEGORIES, PETS } from '../data/pets';
 import { NavSection } from './Sidebar';
 import { PetcraftMark } from './PetcraftMark';
 import { usePwaInstall } from '../pwa/pwa';
@@ -10,8 +10,8 @@ import { Download } from 'lucide-react';
 interface HeaderProps {
   selectedCategory: PetCategory;
   onSelectCategory: (cat: PetCategory) => void;
-  globalAction: PetAction | 'auto';
-  onSelectGlobalAction: (act: PetAction | 'auto') => void;
+  sortMode: SortMode;
+  onChangeSort: (mode: SortMode) => void;
   viewMode: 'tile' | 'list' | 'canvas';
   onChangeViewMode: (mode: 'tile' | 'list' | 'canvas') => void;
   renderMode: 'pixel' | 'ascii';
@@ -33,34 +33,46 @@ interface HeaderProps {
   totalShowing: number;
 }
 
+export type SortMode = 'curated' | 'rarity' | 'name';
+
+const SORT_OPTIONS: { id: SortMode; label: string }[] = [
+  { id: 'curated', label: 'Curated' },
+  { id: 'rarity', label: 'Rarest first' },
+  { id: 'name', label: 'A–Z' },
+];
+
 const SECTION_HEADERS: Record<NavSection, { title: string; subtitle: string }> = {
   finds: {
-    title: 'Interactive details and companion moments.',
-    subtitle: 'Short-form recordings of interface craft, 8fps pixel animations, and AI coding companions.',
+    title: 'A living collection of pixel companions.',
+    subtitle: 'Every card is a short loop of what that pet does beside your code. Open one to make it yours.',
   },
   inspiration: {
-    title: 'Visual references for research and direction.',
-    subtitle: 'Design galleries, mythical companions, and editorial collections for visual research.',
+    title: 'Mythical, feathered and from the deep.',
+    subtitle: 'The more unusual companions: spirits, unicorns, birds and creatures of the sea.',
   },
   resources: {
-    title: 'Component libraries and sprite packs.',
-    subtitle: 'Hand-crafted pixel sheets, Pretext ASCII rigs, and habitat assets ready to drop in.',
+    title: 'Companions with the most to unpack.',
+    subtitle: 'Pets with several coats or a pixel habitat to drop into your own projects.',
   },
   tools: {
-    title: 'Software for design and development workflows.',
-    subtitle: 'Claude Code /buddy, VS Code Pets, Orca CLI, and Cursor IDE companion integrations.',
+    title: 'Made for your terminal and editor.',
+    subtitle: 'Companions tuned for Claude Code, Orca CLI, Cursor and Codex.',
   },
   portfolios: {
-    title: 'Personal sites of designers and engineers.',
-    subtitle: 'Curated companion creators, pixel artists, and creative toolmakers.',
+    title: 'The whole cast, one card each.',
+    subtitle: 'Every companion in the collection, side by side.',
   },
   favourites: {
-    title: 'Your saved companions and tool presets.',
-    subtitle: 'Starred companions persisted locally for instant one-click export.',
+    title: 'Your favourites.',
+    subtitle: 'Companions you starred, saved in this browser.',
   },
   folders: {
-    title: 'Organized collections and custom folders.',
-    subtitle: 'Group companions by project, editor workflow, or aesthetic palette.',
+    title: 'Your folders.',
+    subtitle: 'Group companions by project, editor or mood.',
+  },
+  info: {
+    title: 'About Petcraft',
+    subtitle: '',
   },
 };
 
@@ -94,8 +106,8 @@ const HEADER_SPONSORS = [
 export const Header: React.FC<HeaderProps> = ({
   selectedCategory,
   onSelectCategory,
-  globalAction,
-  onSelectGlobalAction,
+  sortMode,
+  onChangeSort,
   viewMode,
   onChangeViewMode,
   renderMode,
@@ -167,12 +179,8 @@ export const Header: React.FC<HeaderProps> = ({
   const visibleCategories = PET_CATEGORIES.slice(0, 4);
   const overflowCategories = PET_CATEGORIES.slice(4);
   const activeSwatch = COLOR_SWATCHES.find((c) => c.id === selectedColorFilter) || COLOR_SWATCHES[0];
-  const activeActionLabel =
-    globalAction === 'auto'
-      ? activeNav === 'finds'
-        ? 'Recent'
-        : 'Curated'
-      : ACTIONS.find((a) => a.id === globalAction)?.label || 'Recent';
+  const activeSortLabel = SORT_OPTIONS.find((o) => o.id === sortMode)?.label || 'Curated';
+  const isInfo = activeNav === 'info';
 
   return (
     <>
@@ -204,7 +212,10 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onOpenInfo}
-            className="text-lead font-medium transition-colors duration-150 text-ink-3 hover:text-ink"
+            aria-current={isInfo ? 'page' : undefined}
+            className={`text-lead font-medium transition-colors duration-150 ${
+              isInfo ? 'text-ink' : 'text-ink-3 hover:text-ink'
+            }`}
           >
             Info
           </button>
@@ -532,12 +543,12 @@ export const Header: React.FC<HeaderProps> = ({
           petcraft<span className="pc-mark-blink text-[#5b7cff]">_</span>
         </button>
         <p className="mt-4 text-[15px] leading-[1.6] text-pretty text-ink">
-          A curated collection of interface craft, interactive AI companions, pixel sprites, and resources for builders.
+          A hand-picked collection of pixel companions that live next to your code.
         </p>
       </section>
 
       {/* Centered Editorial Hero Title (Hidden in List view, just like designeer.xyz) */}
-      {viewMode !== 'list' && (
+      {viewMode !== 'list' && !isInfo && (
         <section className="mx-auto flex max-w-[36rem] flex-col items-center gap-2 px-0 pt-7 pb-6 text-center sm:gap-2.5 sm:px-4 sm:pt-16 sm:pb-[2.95rem]">
           <h1 className="font-display text-[22px] leading-[1.25] sm:text-[20px] sm:leading-[1.2] font-medium tracking-[-0.02em] text-balance text-ink">
             {currentHero.title}
@@ -548,7 +559,8 @@ export const Header: React.FC<HeaderProps> = ({
         </section>
       )}
 
-      {/* Sticky Filter Row (data-filter-row="true") - Exact designeer.xyz DOM */}
+      {/* Sticky filter row */}
+      {!isInfo && (
       <div
         data-filter-row="true"
         className="sticky top-0 isolate z-20 -mx-[16px] flex items-center gap-2 sm:gap-3 px-[16px] pt-1 pb-3 sm:pt-4 sm:pb-5"
@@ -745,7 +757,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* Recent / Animation Loop Dropdown Pill */}
+            {/* Sort */}
             <div className="relative max-md:hidden" ref={actionRef}>
               <button
                 type="button"
@@ -754,59 +766,39 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => setActionMenuOpen((prev) => !prev)}
                 className="group/button inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium whitespace-nowrap outline-none select-none transition-[color,opacity,transform] duration-150 active:scale-[0.98] surface surface-outline text-ink tap h-7 px-2.5 text-small sm:h-8 sm:px-3.5 sm:text-lead"
               >
-                <span>{activeActionLabel}</span>
+                <span>{activeSortLabel}</span>
                 <svg className="size-4 shrink-0 text-ink-3" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <polyline points="4,6 8,10 12,6" />
                 </svg>
               </button>
 
               {actionMenuOpen && (
-                <div className="animate-popup-in absolute top-full right-0 z-50 mt-2 w-52 rounded-tray layer-float p-1.5">
-                  <div className="px-2.5 py-1 text-micro font-medium text-ink-3 uppercase tracking-wider">
-                    Sort &amp; Live State
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSelectGlobalAction('auto');
-                      setActionMenuOpen(false);
-                    }}
-                    className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-body transition-colors ${
-                      globalAction === 'auto'
-                        ? 'bg-wash font-medium text-ink'
-                        : 'text-ink-2 hover:bg-wash hover:text-ink'
-                    }`}
-                  >
-                    <span>Recent (Auto Loop)</span>
-                    {globalAction === 'auto' && <span className="size-1.5 rounded-full bg-brand" />}
-                  </button>
-                  <hr className="my-1 border-t border-line" />
-                  <div className="max-h-56 overflow-y-auto scrollbar-none">
-                    {ACTIONS.map((act) => (
-                      <button
-                        key={act.id}
-                        type="button"
-                        onClick={() => {
-                          onSelectGlobalAction(act.id);
-                          setActionMenuOpen(false);
-                        }}
-                        className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-body transition-colors ${
-                          globalAction === act.id
-                            ? 'bg-wash font-medium text-ink'
-                            : 'text-ink-2 hover:bg-wash hover:text-ink'
-                        }`}
-                      >
-                        <span>Action: {act.label}</span>
-                        <kbd className="font-mono text-micro text-ink-3">{act.shortcut}</kbd>
-                      </button>
-                    ))}
-                  </div>
+                <div role="menu" className="animate-popup-in absolute top-full right-0 z-50 mt-2 w-44 rounded-tray layer-float p-1.5">
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={sortMode === opt.id}
+                      onClick={() => {
+                        onChangeSort(opt.id);
+                        setActionMenuOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-body transition-colors ${
+                        sortMode === opt.id ? 'bg-wash font-medium text-ink' : 'text-ink-2 hover:bg-wash hover:text-ink'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                      {sortMode === opt.id && <span className="size-1.5 rounded-full bg-brand" />}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+      )}
     </>
   );
 };
