@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/pet-collection/icons/icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pet-collection/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/pet-collection/icons/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
+    <!-- PWA / iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Petcraft" />
+    <meta name="application-name" content="Petcraft" />
+    <title>Petcraft — Premium pixel characters for the tools you code in.</title>
+    <meta name="description" content="Petcraft is a curated collection of animated pixel characters, cursor sets, terminal themes and sprite packs for Claude Code, Cursor, VS Code and your terminal." />
+    <meta property="og:title" content="Petcraft — Premium pixel characters for the tools you code in." />
+    <meta property="og:description" content="Petcraft is a curated collection of animated pixel characters, cursor sets, terminal themes and sprite packs for Claude Code, Cursor, VS Code and your terminal." />
+    <meta property="og:image" content="/pet-collection/icons/icon-512.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600&family=Funnel+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Silkscreen:wght@400&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600&family=Funnel+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Silkscreen:wght@400&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem("petcraft-theme");
+          var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var isDark = saved ? saved === "dark" : prefersDark;
+          document.documentElement.classList.toggle("dark", isDark);
+        } catch(e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/pet-collection/assets/index-ZCkS5xWp.js"></script>
+    <link rel="modulepreload" crossorigin href="/pet-collection/assets/vendor-react-D3F3s8fL.js">
+    <link rel="stylesheet" crossorigin href="/pet-collection/assets/index-SgoOWuuk.css">
+  <link rel="manifest" href="/pet-collection/manifest.webmanifest"></head>
+  <body class="hatch min-h-full font-sans antialiased text-ink">
+    <div id="root"></div>
+    <noscript><p style="padding:2rem;font-family:system-ui">Petcraft needs JavaScript to show the collection.</p></noscript>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="44%" r="62%">
+      <stop offset="0%" stop-color="#1f78ff" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#1f78ff" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#1f78ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#121a29"/>
+      <stop offset="100%" stop-color="#0b0e14"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <g shape-rendering="crispEdges" fill="#ffffff">
+    <!-- left toe -->
+    <rect x="112" y="112" width="48" height="64"/>
+    <rect x="128" y="96" width="16" height="16"/>
+    <!-- center toe -->
+    <rect x="208" y="80" width="96" height="96"/>
+    <rect x="224" y="64" width="64" height="16"/>
+    <!-- right toe -->
+    <rect x="352" y="112" width="48" height="64"/>
+    <rect x="368" y="96" width="16" height="16"/>
+    <!-- main pad (pixel-rounded) -->
+    <rect x="176" y="192" width="160" height="16"/>
+    <rect x="160" y="208" width="192" height="112"/>
+    <rect x="176" y="320" width="160" height="16"/>
+    <rect x="144" y="208" width="16" height="112"/>
+    <rect x="352" y="208" width="16" height="112"/>
+  </g>
+  <g shape-rendering="crispEdges" fill="#ff8a5b">
+    <!-- warm pixel signature inside the pad -->
+    <rect x="240" y="248" width="32" height="32"/>
+  </g>
+</svg>
