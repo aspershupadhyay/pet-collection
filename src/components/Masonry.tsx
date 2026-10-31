@@ -3,8 +3,8 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 interface MasonryProps<T> {
   items: T[];
   getKey: (item: T) => string;
-  /** Stage width ÷ height for an item; lower is taller. */
-  getRatio: (item: T) => number;
+  /** Stage width ÷ height for an item at the given column width; lower is taller. */
+  getRatio: (item: T, columnWidth: number) => number;
   /** Fixed height below the stage (caption plate), in px. */
   footerHeight?: number;
   gap?: number;
@@ -48,7 +48,7 @@ export function Masonry<T>({
     const buckets: { item: T; index: number; ratio: number }[][] = Array.from({ length: cols }, () => []);
     const heights = new Array(cols).fill(0);
     items.forEach((item, index) => {
-      const ratio = getRatio(item);
+      const ratio = getRatio(item, colWidth || 300);
       let target = 0;
       for (let c = 1; c < cols; c += 1) {
         // Small bias keeps near-ties flowing left-to-right

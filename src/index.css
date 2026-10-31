@@ -721,49 +721,18 @@
 
 .pc-stage {
   --tint: #888;
-  background:
-    radial-gradient(110% 62% at 50% 100%, color-mix(in srgb, var(--tint) 20%, transparent), transparent 62%),
-    radial-gradient(90% 55% at 50% -5%, color-mix(in srgb, var(--ink) 5%, transparent), transparent 70%),
-    var(--well);
-  box-shadow: inset 0 0 0 1px var(--line);
+  /* One flat tone per pet, taken from its own palette */
+  background: color-mix(in srgb, var(--tint) 14%, var(--well));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 10%, var(--line));
   transition: box-shadow 0.25s var(--ease-out), transform 0.35s var(--ease-out);
 }
+.dark .pc-stage {
+  background: color-mix(in srgb, var(--tint) 11%, var(--well));
+}
 .pc-card:hover .pc-stage {
-  box-shadow: inset 0 0 0 1px var(--line-strong), 0 22px 44px -22px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 30%, var(--line-strong)), 0 18px 36px -22px rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
 }
-
-/* Receding pixel floor the companion stands on */
-.pc-floor {
-  position: absolute;
-  inset: auto -25% 0 -25%;
-  height: 38%;
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1px);
-  background-size: 28px 28px;
-  transform: perspective(260px) rotateX(58deg);
-  transform-origin: 50% 100%;
-  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 85%);
-  mask-image: linear-gradient(to top, #000 10%, transparent 85%);
-  pointer-events: none;
-}
-
-/* Pointer-follow light — written via CSS vars, no React re-render */
-.pc-light {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 35%), rgba(255, 255, 255, 0.5), transparent 62%);
-  mix-blend-mode: soft-light;
-  transition: opacity 0.3s var(--ease-out);
-}
-.dark .pc-light {
-  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 35%), rgba(255, 255, 255, 0.09), transparent 62%);
-  mix-blend-mode: normal;
-}
-.pc-card:hover .pc-light { opacity: 1; }
 
 /* Holo foil — Legendary & Mythic only */
 .pc-foil {
@@ -783,7 +752,6 @@
   mix-blend-mode: soft-light;
   transition: opacity 0.35s var(--ease-out);
 }
-.pc-card:hover .pc-foil { opacity: 0.55; }
 .pc-foil-ring {
   position: absolute;
   inset: 0;
@@ -797,7 +765,6 @@
   opacity: 0.55;
   transition: opacity 0.3s var(--ease-out);
 }
-.pc-card:hover .pc-foil-ring { opacity: 1; }
 .pc-tier-legendary { --foil-a: #ffd27a; --foil-b: #fff4d6; --foil-c: #d18b1f; }
 .pc-tier-mythic { --foil-a: #b79bff; --foil-b: #7fe3ff; --foil-c: #ff9bd8; }
 

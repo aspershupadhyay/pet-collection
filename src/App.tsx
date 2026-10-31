@@ -13,6 +13,7 @@ import { SubmitModal } from './components/InfoSubmitModals';
 import { InfoPage } from './components/InfoPage';
 import { Masonry } from './components/Masonry';
 import { petHash } from './data/showreel';
+import { petScale, petRefHeight } from './components/PixelSprite';
 import { Toast, ToastItem } from './components/Toast';
 import { generateToolSnippets } from './utils/toolExport';
 import { Folder as FolderIcon, Plus, Trash2 } from 'lucide-react';
@@ -20,7 +21,27 @@ import { Folder as FolderIcon, Plus, Trash2 } from 'lucide-react';
 /* Tile shapes for the masonry wall (stage width ÷ height). Each pet keeps the
    same shape everywhere, so the wall's rhythm is stable between visits. */
 const TILE_RATIOS = [0.8, 0.92, 1.04, 1.16, 1.3];
-const tileRatio = (pet: PetDefinition) => TILE_RATIOS[petHash(pet.id) % TILE_RATIOS.length];
+const IDEAL_FILL = 0.55;
+
+/* The card takes the shape that lets its pet render largest at a whole-pixel
+   scale; among near-equal fits the pet's hash picks, so the wall still varies. */
+const ratioCache = new Map<string, number>();
+const tileRatio = (pet: PetDefinition, colWidth: number) => {
+  const key = `${pet.id}:${Math.round(colWidth)}`;
+  const cached = ratioCache.get(key);
+  if (cached) return cached;
+  const scored = TILE_RATIOS.map((ratio) => {
+    const h = colWidth / ratio;
+    const { scale } = petScale(pet, colWidth, h, IDEAL_FILL);
+    const spriteH = petRefHeight(pet) * scale;
+    return { ratio, score: Math.abs(spriteH / h - IDEAL_FILL) };
+  });
+  const bestScore = Math.min(...scored.map((s) => s.score));
+  const good = scored.filter((s) => s.score <= bestScore + 0.06);
+  const ratio = good[petHash(pet.id) % good.length].ratio;
+  ratioCache.set(key, ratio);
+  return ratio;
+};
 
 const RARITY_RANK: Record<PetDefinition['rarity'], number> = {
   Mythic: 0,
